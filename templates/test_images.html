@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>图片测试</title>
+</head>
+<body>
+    <h1>图片路径测试</h1>
+    
+    <h2>直接路径测试</h2>
+    <img src="/media/media_files/SDX_01.jpg" alt="SDX_01" style="width: 200px;">
+    <br>
+    <img src="/media/media_files/青岛-酒店.jpg" alt="青岛酒店" style="width: 200px;">
+    
+    <h2>模板逻辑测试</h2>
+    <div>
+        {% for model in models %}
+            <div style="border: 1px solid #ccc; margin: 10px; padding: 10px;">
+                <h3>{{ model.name }}</h3>
+                {% if model.media_files %}
+                    {% for media_file in model.media_files %}
+                        <p>文件名: {{ media_file.name }}</p>
+                        <p>路径: {{ media_file.path }}</p>
+                        {% if ".png" in media_file.name|lower or ".jpg" in media_file.name|lower or ".jpeg" in media_file.name|lower or ".bmp" in media_file.name|lower or ".tga" in media_file.name|lower %}
+                            <img src="/{{ media_file.path }}" alt="{{ model.name }}" style="width: 200px;">
+                        {% else %}
+                            <p>不是图片文件</p>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <p>没有媒体文件</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
+

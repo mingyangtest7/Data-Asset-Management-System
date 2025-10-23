@@ -1,0 +1,1160 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据资产管理系统</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0f1419;
+            color: #ffffff;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* 顶部导航栏 */
+        .top-navbar {
+            background: rgba(15, 20, 25, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0 2rem;
+            height: 60px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .navbar-brand {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        
+        .navbar-brand:hover {
+            color: #4a9eff;
+        }
+        
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .navbar-link {
+            color: #a0a0a0;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+        
+        .navbar-link:hover {
+            color: #ffffff;
+        }
+        
+        .notification-icon {
+            color: #a0a0a0;
+            font-size: 18px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .notification-icon:hover {
+            color: #4a9eff;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #ffffff;
+            font-size: 14px;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #4a9eff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .user-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(30, 30, 50, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+            min-width: 150px;
+            display: none;
+        }
+        
+        .dropdown-item {
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+        
+        /* 左侧边栏 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 60px;
+            width: 250px;
+            height: calc(100vh - 60px);
+            background: rgba(20, 25, 35, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem 0;
+            z-index: 999;
+        }
+        
+        .sidebar-item {
+            display: block;
+            color: #a0a0a0;
+            text-decoration: none;
+            padding: 1rem 2rem;
+            margin: 0.25rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .sidebar-item:hover,
+        .sidebar-item.active {
+            background: rgba(74, 158, 255, 0.2);
+            color: #4a9eff;
+        }
+        
+        .sidebar-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            margin-left: 250px;
+            margin-top: 60px;
+            padding: 2rem;
+            min-height: calc(100vh - 60px);
+        }
+        
+        /* 标签页 */
+        .nav-tabs {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .nav-tabs .nav-link {
+            color: #a0a0a0;
+            border: none;
+            background: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tabs .nav-link:hover,
+        .nav-tabs .nav-link.active {
+            color: #4a9eff;
+            background: none;
+            border-bottom: 2px solid #4a9eff;
+        }
+        
+        /* 数据统计卡片 */
+        .stats-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stats-card {
+            background: rgba(30, 30, 50, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(5px);
+        }
+        
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .stats-title {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .time-filter {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .time-btn {
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #a0a0a0;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .time-btn:hover,
+        .time-btn.active {
+            background: #4a9eff;
+            color: #ffffff;
+            border-color: #4a9eff;
+        }
+        
+        .date-range {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .date-input {
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .stats-numbers {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4a9eff;
+        }
+        
+        .stat-label {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+        
+        .stat-icon {
+            color: #4a9eff;
+            font-size: 16px;
+        }
+        
+        /* 图表容器 */
+        .chart-container {
+            height: 200px;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* 数据列表 */
+        .data-list {
+            background: rgba(20, 25, 35, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+        }
+        
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .list-title {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .view-all {
+            color: #4a9eff;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .data-item {
+            background: rgba(30, 30, 50, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .data-thumbnail {
+            width: 100%;
+            height: 120px;
+            background: rgba(40, 40, 60, 0.8);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a0a0a0;
+            font-size: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .data-thumbnail img,
+        .data-thumbnail video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+        
+        .data-title {
+            color: #ffffff;
+            font-size: 14px;
+            margin-bottom: 0.25rem;
+        }
+        
+        .data-meta {
+            color: #a0a0a0;
+            font-size: 12px;
+        }
+        
+        /* 分页 */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .pagination-info {
+            color: #a0a0a0;
+            font-size: 12px;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .page-btn {
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #a0a0a0;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .page-btn:hover {
+            background: #4a9eff;
+            color: #ffffff;
+        }
+        
+        .page-input {
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 12px;
+            width: 60px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-numbers {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="top-navbar">
+        <a href="#" class="navbar-brand">
+            <i class="fas fa-cube me-2"></i>
+            三维数据资产管理系统
+        </a>
+        
+        <div class="navbar-right">
+            <a href="#" class="navbar-link"></a>
+            <i class="fas fa-bell notification-icon"></i>
+            <div class="user-dropdown">
+                <div class="user-info" onclick="toggleDropdown()">
+                    <div class="user-avatar">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <span>超级管理员</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="dropdown-menu" id="userDropdown">
+                    <a href="#" class="dropdown-item" onclick="openPersonalCenter()">
+                        <i class="fas fa-user me-2"></i>
+                        个人中心
+                    </a>
+                    <a href="{% url 'accounts:logout' %}" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt me-2"></i>
+                        退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 左侧边栏 -->
+    <aside class="sidebar">
+        <a href="{% url 'accounts:dashboard' %}" class="sidebar-item active">
+            <i class="fas fa-chart-bar"></i>
+            数据统计
+        </a>
+        <a href="{% url 'accounts:my_data' %}" class="sidebar-item">
+            <i class="fas fa-folder"></i>
+            我的数据
+        </a>
+        <a href="{% url 'accounts:data_management' %}" class="sidebar-item">
+            <i class="fas fa-list"></i>
+            数据管理
+        </a>
+        <a href="{% url 'accounts:system_settings' %}" class="sidebar-item">
+            <i class="fas fa-cog"></i>
+            系统设置
+        </a>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <!-- 标签页 -->
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link active" href="#">模型使用数据</a>
+            </li>
+{#            <li class="nav-item">#}
+{#                <a class="nav-link" href="#">用户操作数据</a>#}
+{#            </li>#}
+        </ul>
+
+        <!-- 数据统计区域 -->
+        <div class="stats-container">
+            <!-- 上传数据 -->
+            <div class="stats-card">
+                <div class="stats-header">
+                    <h3 class="stats-title">上传数据</h3>
+                    <div class="time-filter">
+                        <button class="time-btn">日</button>
+                        <button class="time-btn">周</button>
+                        <button class="time-btn active">月</button>
+                    </div>
+                </div>
+                
+                <div class="date-range">
+                    <input type="date" class="date-input" placeholder="开始日期">
+                    <input type="date" class="date-input" placeholder="结束日期">
+                </div>
+                
+                <div class="stats-numbers">
+                    <div class="stat-item">
+                        <i class="fas fa-edit stat-icon"></i>
+                        <div>
+                            <div class="stat-number">{{ total_uploads }}</div>
+                            <div class="stat-label">数据上传次数</div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-thumbs-up stat-icon"></i>
+                        <div>
+                            <div class="stat-number">{{ total_uploads }}</div>
+                            <div class="stat-label">上传模型个数</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="uploadChart"></canvas>
+                </div>
+                
+                <div class="data-list">
+                    <div class="list-header">
+                        <h4 class="list-title">本月上传数据</h4>
+                        <a href="#" class="view-all">查看全部</a>
+                    </div>
+                    <div class="data-grid">
+                        {% for upload in user_uploads %}
+                        <div class="data-item">
+                            <div class="data-thumbnail">
+                                {% if upload.source_model and upload.source_model.media_files %}
+                                    {% for media_file in upload.source_model.media_files %}
+                                        {% if ".mp4" in media_file.name|lower or ".webm" in media_file.name|lower %}
+                                            <video width="100%" height="100%" style="object-fit: cover; border-radius: 6px;">
+                                                <source src="/media/{{ media_file.path }}" type="video/mp4">
+                                            </video>
+                                        {% elif ".png" in media_file.name|lower or ".jpg" in media_file.name|lower or ".jpeg" in media_file.name|lower or ".bmp" in media_file.name|lower or ".tga" in media_file.name|lower %}
+                                            <img src="/media/{{ media_file.path }}" alt="缩略图" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;">
+                                        {% else %}
+                                            <i class="fas fa-file"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    {% if ".mp4" in upload.filename|lower or ".webm" in upload.filename|lower %}
+                                        <i class="fas fa-video"></i>
+                                    {% elif ".png" in upload.filename|lower or ".jpg" in upload.filename|lower or ".jpeg" in upload.filename|lower %}
+                                        <i class="fas fa-image"></i>
+                                    {% else %}
+                                        <i class="fas fa-file"></i>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="data-title">{{ upload.filename }}</div>
+                            <div class="data-meta">{{ upload.upload_time|date:"Y-m-d H:i" }}</div>
+                        </div>
+                        {% empty %}
+                        <div class="data-item" style="grid-column: 1 / -1; text-align: center; color: #a0a0a0;">
+                            <div class="data-title">暂无上传数据</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="pagination">
+                        <div class="pagination-info">共计{{ total_uploads }}条</div>
+                        <div class="pagination-controls">
+                            <button class="page-btn">&lt;</button>
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">2</button>
+                            <button class="page-btn">&gt;</button>
+                            <span style="color: #a0a0a0; font-size: 12px;">20条/页</span>
+                            <span style="color: #a0a0a0; font-size: 12px;">跳至</span>
+                            <input type="number" class="page-input" value="1">
+                            <span style="color: #a0a0a0; font-size: 12px;">页</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 下载数据 -->
+            <div class="stats-card">
+                <div class="stats-header">
+                    <h3 class="stats-title">下载数据</h3>
+                    <div class="time-filter">
+                        <button class="time-btn">日</button>
+                        <button class="time-btn">周</button>
+                        <button class="time-btn active">月</button>
+                    </div>
+                </div>
+                
+                <div class="date-range">
+                    <input type="date" class="date-input" placeholder="开始日期">
+                    <input type="date" class="date-input" placeholder="结束日期">
+                </div>
+                
+                <div class="stats-numbers">
+                    <div class="stat-item">
+                        <i class="fas fa-edit stat-icon"></i>
+                        <div>
+                            <div class="stat-number">{{ total_downloads }}</div>
+                            <div class="stat-label">数据下载次数</div>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-thumbs-up stat-icon"></i>
+                        <div>
+                            <div class="stat-number">{{ total_downloads }}</div>
+                            <div class="stat-label">下载模型个数</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="downloadChart"></canvas>
+                </div>
+                
+                <div class="data-list">
+                    <div class="list-header">
+                        <h4 class="list-title">本月下载数据</h4>
+                        <a href="#" class="view-all">查看全部</a>
+                    </div>
+                    <div class="data-grid">
+                        {% for download in user_downloads %}
+                        <div class="data-item">
+                            <div class="data-thumbnail">
+                                {% if download.source_model and download.source_model.media_files %}
+                                    {% for media_file in download.source_model.media_files %}
+                                        {% if ".mp4" in media_file.name|lower or ".webm" in media_file.name|lower %}
+                                            <video width="100%" height="100%" style="object-fit: cover; border-radius: 6px;">
+                                                <source src="/media/{{ media_file.path }}" type="video/mp4">
+                                            </video>
+                                        {% elif ".png" in media_file.name|lower or ".jpg" in media_file.name|lower or ".jpeg" in media_file.name|lower or ".bmp" in media_file.name|lower or ".tga" in media_file.name|lower %}
+                                            <img src="/media/{{ media_file.path }}" alt="缩略图" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;">
+                                        {% else %}
+                                            <i class="fas fa-file"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    {% if ".mp4" in download.filename|lower or ".webm" in download.filename|lower %}
+                                        <i class="fas fa-video"></i>
+                                    {% elif ".png" in download.filename|lower or ".jpg" in download.filename|lower or ".jpeg" in download.filename|lower %}
+                                        <i class="fas fa-image"></i>
+                                    {% else %}
+                                        <i class="fas fa-file"></i>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="data-title">{{ download.filename }}</div>
+                            <div class="data-meta">{{ download.download_time|date:"Y-m-d H:i" }}</div>
+                        </div>
+                        {% empty %}
+                        <div class="data-item" style="grid-column: 1 / -1; text-align: center; color: #a0a0a0;">
+                            <div class="data-title">暂无下载数据</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="pagination">
+                        <div class="pagination-info">共计{{ total_downloads }}条</div>
+                        <div class="pagination-controls">
+                            <button class="page-btn">&lt;</button>
+                            <button class="page-btn active">1</button>
+                            <button class="page-btn">&gt;</button>
+                            <span style="color: #a0a0a0; font-size: 12px;">20条/页</span>
+                            <span style="color: #a0a0a0; font-size: 12px;">跳至</span>
+                            <input type="number" class="page-input" value="1">
+                            <span style="color: #a0a0a0; font-size: 12px;">页</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 用户下拉菜单
+        function toggleDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+        
+        // 点击外部关闭下拉菜单
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const userInfo = document.querySelector('.user-info');
+            if (!userInfo.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+        
+        // 时间筛选按钮
+        document.querySelectorAll('.time-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const container = this.closest('.time-filter');
+                container.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+        
+        // 初始化图表
+        function initCharts() {
+            console.log('开始初始化图表...');
+            
+            // 检查Chart.js是否加载
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js 未加载');
+                return;
+            }
+            console.log('Chart.js 已加载，版本:', Chart.version);
+            
+            // 获取后端传递的图表数据
+            const chartData = {{ chart_data|safe }};
+            console.log('图表数据:', chartData);
+            
+            // 检查数据格式
+            if (!chartData || !chartData.dates || !chartData.upload_counts || !chartData.download_counts) {
+                console.error('图表数据格式错误:', chartData);
+                return;
+            }
+            
+            // 上传数据图表
+            const uploadCtx = document.getElementById('uploadChart');
+            if (!uploadCtx) {
+                console.error('找不到 uploadChart 元素');
+                return;
+            }
+            
+            console.log('创建上传图表...');
+            new Chart(uploadCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: chartData.dates,
+                    datasets: [{
+                        label: '上传次数',
+                        data: chartData.upload_counts,
+                        borderColor: '#ff6b35',
+                        backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#a0a0a0',
+                                usePointStyle: true
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#a0a0a0'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#a0a0a0'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // 下载数据图表
+            const downloadCtx = document.getElementById('downloadChart');
+            if (!downloadCtx) {
+                console.error('找不到 downloadChart 元素');
+                return;
+            }
+            
+            console.log('创建下载图表...');
+            new Chart(downloadCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: chartData.dates,
+                    datasets: [{
+                        label: '下载次数',
+                        data: chartData.download_counts,
+                        borderColor: '#4a9eff',
+                        backgroundColor: 'rgba(74, 158, 255, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#a0a0a0',
+                                usePointStyle: true
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#a0a0a0'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#a0a0a0'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            console.log('图表初始化完成');
+        }
+        
+        // 页面加载完成后初始化图表
+        document.addEventListener('DOMContentLoaded', initCharts);
+    </script>
+    
+    <!-- 个人中心弹窗 -->
+    <div id="personalCenterModal" class="personal-center-modal">
+        <div class="personal-center-content">
+            <div class="personal-center-header">
+                <h3 class="personal-center-title">基础信息</h3>
+                <button class="close-btn" onclick="closePersonalCenter()">&times;</button>
+            </div>
+            
+            <div class="personal-center-body">
+                <!-- 头像 -->
+                <div class="info-item">
+                    <span class="info-label">头像:</span>
+                    <div class="avatar-section">
+                        <div class="avatar-image">
+                            <i class="fas fa-rocket"></i>
+                        </div>
+                        <button class="upload-btn" onclick="uploadAvatar()">
+                            <i class="fas fa-upload"></i>
+                            上传
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 昵称 -->
+                <div class="info-item">
+                    <span class="info-label required">昵称:</span>
+                    <span class="info-value">{{ user.display_name|default:user.username }}</span>
+                    <i class="fas fa-edit edit-icon" onclick="editNickname()"></i>
+                </div>
+                
+                <!-- 账号 -->
+                <div class="info-item">
+                    <span class="info-label">账号:</span>
+                    <span class="info-value">{{ user.username }}</span>
+                </div>
+                
+                <!-- 默认密码 -->
+                <div class="info-item">
+                    <span class="info-label">默认密码:</span>
+                    <span class="info-value">adaspace2024</span>
+                    <button class="copy-btn" onclick="copyPassword()">复制</button>
+                </div>
+                
+                <!-- 修改密码按钮 -->
+                <button class="change-password-btn" onclick="changePassword()">
+                    修改密码
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        /* 个人中心弹窗样式 */
+        .personal-center-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+        
+        .personal-center-modal.show {
+            display: block;
+        }
+        
+        .personal-center-content {
+            background: linear-gradient(135deg, rgba(20, 20, 35, 0.95), rgba(30, 30, 50, 0.95));
+            margin: 5% auto;
+            padding: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            position: relative;
+        }
+        
+        .personal-center-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .personal-center-title {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .personal-center-body {
+            padding: 2rem;
+        }
+        
+        .info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: rgba(40, 40, 60, 0.5);
+            border-radius: 8px;
+        }
+        
+        .info-label {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 80px;
+            margin-right: 1rem;
+        }
+        
+        .info-label.required::before {
+            content: '*';
+            color: #ff4757;
+            margin-right: 0.25rem;
+        }
+        
+        .info-value {
+            color: #ffffff;
+            font-size: 14px;
+            flex: 1;
+        }
+        
+        .avatar-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .avatar-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 24px;
+        }
+        
+        .upload-btn {
+            background: rgba(60, 60, 80, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .upload-btn:hover {
+            background: rgba(80, 80, 100, 0.8);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .edit-icon {
+            color: #4a9eff;
+            cursor: pointer;
+            margin-left: 0.5rem;
+            font-size: 16px;
+        }
+        
+        .copy-btn {
+            background: #4a9eff;
+            border: none;
+            color: #ffffff;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .copy-btn:hover {
+            background: #3a8eef;
+        }
+        
+        .change-password-btn {
+            background: #4a9eff;
+            border: none;
+            color: #ffffff;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+        
+        .change-password-btn:hover {
+            background: #3a8eef;
+        }
+    </style>
+    
+    <script>
+        // 个人中心弹窗功能
+        function openPersonalCenter() {
+            document.getElementById('personalCenterModal').classList.add('show');
+            // 关闭用户下拉菜单
+            document.getElementById('userDropdown').style.display = 'none';
+        }
+        
+        function closePersonalCenter() {
+            document.getElementById('personalCenterModal').classList.remove('show');
+        }
+        
+        function uploadAvatar() {
+            alert('上传头像功能');
+        }
+        
+        function editNickname() {
+            alert('编辑昵称功能');
+        }
+        
+        function copyPassword() {
+            // 获取密码值
+            const passwordItems = document.querySelectorAll('.info-item');
+            let password = 'adaspace2024'; // 默认值
+            
+            passwordItems.forEach(item => {
+                const label = item.querySelector('.info-label');
+                if (label && label.textContent.includes('默认密码')) {
+                    const valueElement = item.querySelector('.info-value');
+                    if (valueElement) {
+                        password = valueElement.textContent;
+                    }
+                }
+            });
+            
+            navigator.clipboard.writeText(password).then(() => {
+                alert('密码已复制到剪贴板');
+            }).catch(() => {
+                // 备用方案
+                const textArea = document.createElement('textarea');
+                textArea.value = password;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('密码已复制到剪贴板');
+            });
+        }
+        
+        function changePassword() {
+            alert('修改密码功能');
+        }
+        
+        // 点击外部关闭弹窗
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('personalCenterModal');
+            if (event.target === modal) {
+                closePersonalCenter();
+            }
+        });
+    </script>
+</body>
+</html>

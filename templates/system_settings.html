@@ -1,0 +1,1062 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据资产管理系统</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0f1419;
+            color: #ffffff;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* 顶部导航栏 */
+        .top-navbar {
+            background: rgba(15, 20, 25, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0 2rem;
+            height: 60px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .navbar-brand {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        
+        .navbar-brand:hover {
+            color: #4a9eff;
+        }
+        
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .navbar-link {
+            color: #a0a0a0;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+        
+        .navbar-link:hover {
+            color: #ffffff;
+        }
+        
+        .notification-icon {
+            color: #a0a0a0;
+            font-size: 18px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .notification-icon:hover {
+            color: #4a9eff;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #ffffff;
+            font-size: 14px;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #4a9eff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .user-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(30, 30, 50, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+            min-width: 150px;
+            display: none;
+        }
+        
+        .dropdown-item {
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+        
+        /* 左侧边栏 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 60px;
+            width: 250px;
+            height: calc(100vh - 60px);
+            background: rgba(20, 25, 35, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem 0;
+            z-index: 999;
+        }
+        
+        .sidebar-item {
+            display: block;
+            color: #a0a0a0;
+            text-decoration: none;
+            padding: 1rem 2rem;
+            margin: 0.25rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .sidebar-item:hover,
+        .sidebar-item.active {
+            background: rgba(74, 158, 255, 0.2);
+            color: #4a9eff;
+        }
+        
+        .sidebar-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            margin-left: 250px;
+            margin-top: 60px;
+            padding: 2rem;
+            min-height: calc(100vh - 60px);
+        }
+        
+        /* 标签页导航 */
+        .nav-tabs {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .nav-tabs .nav-link {
+            color: #a0a0a0;
+            border: none;
+            background: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tabs .nav-link:hover,
+        .nav-tabs .nav-link.active {
+            color: #4a9eff;
+            background: none;
+            border-bottom: 2px solid #4a9eff;
+        }
+        
+        /* 添加账户按钮 */
+        .add-account-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .add-account-btn {
+            background: #4a9eff;
+            border: none;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .add-account-btn:hover {
+            background: #357abd;
+        }
+        
+        /* 添加权限按钮 */
+        .add-permission-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .add-permission-btn {
+            background: #4a9eff;
+            border: none;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .add-permission-btn:hover {
+            background: #357abd;
+        }
+        
+        /* 表格容器 */
+        .table-container {
+            background: rgba(30, 30, 50, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(5px);
+            margin-bottom: 1.5rem;
+        }
+        
+        /* 账号管理表格 */
+        .account-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+        
+        .account-table th {
+            background: rgba(40, 40, 60, 0.8);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .account-table td {
+            color: #ffffff;
+            font-size: 14px;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .account-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* 权限管理表格 */
+        .permission-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+        
+        .permission-table th {
+            background: rgba(40, 40, 60, 0.8);
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .permission-table td {
+            color: #ffffff;
+            font-size: 14px;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .permission-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* 状态标签 */
+        .status-tag {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            display: inline-block;
+            min-width: 50px;
+        }
+        
+        .status-tag.enabled {
+            background: #28a745;
+            color: #ffffff;
+        }
+        
+        .status-tag.disabled {
+            background: #dc3545;
+            color: #ffffff;
+        }
+        
+        /* 权限标签 */
+        .permission-tag {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            display: inline-block;
+            min-width: 30px;
+        }
+        
+        .permission-tag.enabled {
+            background: #28a745;
+            color: #ffffff;
+        }
+        
+        .permission-tag.disabled {
+            background: #dc3545;
+            color: #ffffff;
+        }
+        
+        /* 操作按钮 */
+        .action-btn {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #a0a0a0;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 0.5rem;
+        }
+        
+        .action-btn:hover {
+            background: #4a9eff;
+            color: #ffffff;
+            border-color: #4a9eff;
+        }
+        
+        .action-btn.enable-btn:hover {
+            background: #28a745;
+            border-color: #28a745;
+        }
+        
+        .action-btn.disable-btn:hover {
+            background: #ffc107;
+            border-color: #ffc107;
+            color: #000000;
+        }
+        
+        .action-btn.edit-btn:hover {
+            background: #17a2b8;
+            border-color: #17a2b8;
+        }
+        
+        .action-btn.delete-btn:hover {
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+        
+        /* 分页 */
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .page-btn {
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #a0a0a0;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .page-btn:hover,
+        .page-btn.active {
+            background: #4a9eff;
+            color: #ffffff;
+            border-color: #4a9eff;
+        }
+        
+        .page-size-select {
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-left: 1rem;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .account-table {
+                font-size: 12px;
+            }
+            
+            .account-table th,
+            .account-table td {
+                padding: 0.5rem;
+            }
+            
+            .action-btn {
+                padding: 0.25rem 0.5rem;
+                font-size: 10px;
+                margin-right: 0.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="top-navbar">
+        <a href="{% url 'accounts:dashboard' %}" class="navbar-brand">
+            <i class="fas fa-cube me-2"></i>
+            三维数据资产管理系统
+        </a>
+        
+        <div class="navbar-right">
+            <a href="#" class="navbar-link"></a>
+            <i class="fas fa-bell notification-icon"></i>
+            <div class="user-dropdown">
+                <div class="user-info" onclick="toggleDropdown()">
+                    <div class="user-avatar">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <span>超级管理员</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="dropdown-menu" id="userDropdown">
+                    <a href="{% url 'accounts:person' %}" class="dropdown-item">
+                        <i class="fas fa-user me-2"></i>
+                        个人中心
+                    </a>
+                    <a href="{% url 'accounts:logout' %}" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt me-2"></i>
+                        退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 左侧边栏 -->
+    <aside class="sidebar">
+        <a href="{% url 'accounts:dashboard' %}" class="sidebar-item">
+            <i class="fas fa-chart-bar"></i>
+            数据统计
+        </a>
+        <a href="{% url 'accounts:my_data' %}" class="sidebar-item">
+            <i class="fas fa-folder"></i>
+            我的数据
+        </a>
+        <a href="{% url 'accounts:data_management' %}" class="sidebar-item">
+            <i class="fas fa-list"></i>
+            数据管理
+        </a>
+        <a href="{% url 'accounts:system_settings' %}" class="sidebar-item active">
+            <i class="fas fa-cog"></i>
+            系统设置
+        </a>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <!-- 标签页导航 -->
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showAccountManagement()">账号管理</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="#" onclick="showPermissionManagement()">权限管理</a>
+            </li>
+        </ul>
+        
+        <!-- 账号管理内容 -->
+        <div id="accountManagementContent" style="display: none;">
+            <!-- 添加账户按钮 -->
+            <div class="add-account-section">
+                <button class="btn btn-primary add-account-btn" onclick="openAddAccountModal()">
+                    <i class="fas fa-plus"></i>
+                    添加账户
+                </button>
+            </div>
+            
+            <!-- 账号管理表格 -->
+            <div class="table-container">
+                <table class="account-table">
+                    <thead>
+                        <tr>
+                            <th>账号名称</th>
+                            <th>管理员显示名称</th>
+                            <th>状态</th>
+                            <th>创建日期</th>
+                            <th>权限类型</th>
+                            <th>创建人</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>jushen06</td>
+                            <td>jushen06</td>
+                            <td><span class="status-tag disabled">禁用</span></td>
+                            <td>2025-09-13 14:11:57</td>
+                            <td>普通用户</td>
+                            <td>超级管理员</td>
+                            <td>
+                                <button class="action-btn enable-btn" onclick="enableAccount('jushen06')">启用</button>
+                                <button class="action-btn edit-btn" onclick="editAccount('jushen06')">编辑</button>
+                                <button class="action-btn delete-btn" onclick="deleteAccount('jushen06')">删除</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>jushen05</td>
+                            <td>jushen05</td>
+                            <td><span class="status-tag enabled">启用</span></td>
+                            <td>2025-09-13 13:27:32</td>
+                            <td>普通用户</td>
+                            <td>超级管理员</td>
+                            <td>
+                                <button class="action-btn disable-btn" onclick="disableAccount('jushen05')">禁用</button>
+                                <button class="action-btn edit-btn" onclick="editAccount('jushen05')">编辑</button>
+                                <button class="action-btn delete-btn" onclick="deleteAccount('jushen05')">删除</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>jushen04</td>
+                            <td>jushen04</td>
+                            <td><span class="status-tag disabled">禁用</span></td>
+                            <td>2025-09-13 12:15:45</td>
+                            <td>普通用户</td>
+                            <td>超级管理员</td>
+                            <td>
+                                <button class="action-btn enable-btn" onclick="enableAccount('jushen04')">启用</button>
+                                <button class="action-btn edit-btn" onclick="editAccount('jushen04')">编辑</button>
+                                <button class="action-btn delete-btn" onclick="deleteAccount('jushen04')">删除</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>具身003</td>
+                            <td>具身003</td>
+                            <td><span class="status-tag disabled">禁用</span></td>
+                            <td>2025-09-12 16:30:22</td>
+                            <td>普通用户</td>
+                            <td>超级管理员</td>
+                            <td>
+                                <button class="action-btn enable-btn" onclick="enableAccount('具身003')">启用</button>
+                                <button class="action-btn edit-btn" onclick="editAccount('具身003')">编辑</button>
+                                <button class="action-btn delete-btn" onclick="deleteAccount('具身003')">删除</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>jushen02</td>
+                            <td>jushen02</td>
+                            <td><span class="status-tag disabled">禁用</span></td>
+                            <td>2025-09-12 09:45:18</td>
+                            <td>普通用户</td>
+                            <td>超级管理员</td>
+                            <td>
+                                <button class="action-btn enable-btn" onclick="enableAccount('jushen02')">启用</button>
+                                <button class="action-btn edit-btn" onclick="editAccount('jushen02')">编辑</button>
+                                <button class="action-btn delete-btn" onclick="deleteAccount('jushen02')">删除</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>jushen001</td>
+                            <td>具身001</td>
+                            <td><span class="status-tag disabled">禁用</span></td>
+                            <td>2025-09-11 14:54:31</td>
+                            <td>普通用户</td>
+                            <td>超级管理员</td>
+                            <td>
+                                <button class="action-btn enable-btn" onclick="enableAccount('jushen001')">启用</button>
+                                <button class="action-btn edit-btn" onclick="editAccount('jushen001')">编辑</button>
+                                <button class="action-btn delete-btn" onclick="deleteAccount('jushen001')">删除</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>2</td>
+                            <td><span class="status-tag disabled">禁用</span></td>
+                            <td>2025-07-10 10:04:08</td>
+                            <td>权限组测试哈</td>
+                            <td>超级管理员</td>
+                            <td>
+                                <button class="action-btn enable-btn" onclick="enableAccount('2')">启用</button>
+                                <button class="action-btn edit-btn" onclick="editAccount('2')">编辑</button>
+                                <button class="action-btn delete-btn" onclick="deleteAccount('2')">删除</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 分页 -->
+            <div class="pagination">
+                <div class="pagination-controls">
+                    <button class="page-btn">&lt;</button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <button class="page-btn">4</button>
+                    <button class="page-btn">5</button>
+                    <span style="color: #a0a0a0; margin: 0 0.5rem;">...</span>
+                    <button class="page-btn">10</button>
+                    <button class="page-btn">&gt;</button>
+                    <select class="page-size-select">
+                        <option value="10">10条/页</option>
+                        <option value="20">20条/页</option>
+                        <option value="50">50条/页</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 权限管理内容 -->
+        <div id="permissionManagementContent">
+            <!-- 添加权限按钮 -->
+            <div class="add-permission-section">
+                <button class="btn btn-primary add-permission-btn" onclick="openAddPermissionModal()">
+                    <i class="fas fa-plus"></i>
+                    新建权限
+                </button>
+            </div>
+            
+            <!-- 权限管理表格 -->
+            <div class="table-container">
+                <table class="permission-table">
+                    <thead>
+                        <tr>
+                            <th>权限名称</th>
+                            <th>权限描述</th>
+                            <th>数据统计</th>
+                            <th>我的数据</th>
+                            <th>数据管理</th>
+                            <th>系统设置</th>
+                            <th>创建时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>超级管理员</td>
+                            <td>拥有所有权限的超级管理员</td>
+                            <td><span class="permission-tag enabled">✓</span></td>
+                            <td><span class="permission-tag enabled">✓</span></td>
+                            <td><span class="permission-tag enabled">✓</span></td>
+                            <td><span class="permission-tag enabled">✓</span></td>
+                            <td>2025-01-01 00:00:00</td>
+                            <td>
+                                <button class="action-btn edit-btn" onclick="editPermission('超级管理员')">修改</button>
+                                <button class="action-btn delete-btn" onclick="deletePermission('超级管理员')">删除</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>普通用户</td>
+                            <td>只能查看数据统计和我的数据</td>
+                            <td><span class="permission-tag enabled">✓</span></td>
+                            <td><span class="permission-tag enabled">✓</span></td>
+                            <td><span class="permission-tag disabled">✗</span></td>
+                            <td><span class="permission-tag disabled">✗</span></td>
+                            <td>2025-01-15 10:30:00</td>
+                            <td>
+                                <button class="action-btn edit-btn" onclick="editPermission('普通用户')">修改</button>
+                                <button class="action-btn delete-btn" onclick="deletePermission('普通用户')">删除</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>数据管理员</td>
+                            <td>可以管理数据但不能访问系统设置</td>
+                            <td><span class="permission-tag enabled">✓</span></td>
+                            <td><span class="permission-tag enabled">✓</span></td>
+                            <td><span class="permission-tag enabled">✓</span></td>
+                            <td><span class="permission-tag disabled">✗</span></td>
+                            <td>2025-02-01 14:20:00</td>
+                            <td>
+                                <button class="action-btn edit-btn" onclick="editPermission('数据管理员')">修改</button>
+                                <button class="action-btn delete-btn" onclick="deletePermission('数据管理员')">删除</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>只读用户</td>
+                            <td>只能查看数据统计</td>
+                            <td><span class="permission-tag enabled">✓</span></td>
+                            <td><span class="permission-tag disabled">✗</span></td>
+                            <td><span class="permission-tag disabled">✗</span></td>
+                            <td><span class="permission-tag disabled">✗</span></td>
+                            <td>2025-02-15 09:15:00</td>
+                            <td>
+                                <button class="action-btn edit-btn" onclick="editPermission('只读用户')">修改</button>
+                                <button class="action-btn delete-btn" onclick="deletePermission('只读用户')">删除</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>权限组测试哈</td>
+                            <td>测试权限组</td>
+                            <td><span class="permission-tag enabled">✓</span></td>
+                            <td><span class="permission-tag enabled">✓</span></td>
+                            <td><span class="permission-tag enabled">✓</span></td>
+                            <td><span class="permission-tag enabled">✓</span></td>
+                            <td>2025-03-01 16:45:00</td>
+                            <td>
+                                <button class="action-btn edit-btn" onclick="editPermission('权限组测试哈')">修改</button>
+                                <button class="action-btn delete-btn" onclick="deletePermission('权限组测试哈')">删除</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 分页 -->
+            <div class="pagination">
+                <div class="pagination-controls">
+                    <button class="page-btn">&lt;</button>
+                    <button class="page-btn active">1</button>
+                    <button class="page-btn">2</button>
+                    <button class="page-btn">3</button>
+                    <span style="color: #a0a0a0; margin: 0 0.5rem;">...</span>
+                    <button class="page-btn">5</button>
+                    <button class="page-btn">&gt;</button>
+                    <select class="page-size-select">
+                        <option value="10">10条/页</option>
+                        <option value="20">20条/页</option>
+                        <option value="50">50条/页</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 用户下拉菜单
+        function toggleDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+        
+        // 点击外部关闭下拉菜单
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const userInfo = document.querySelector('.user-info');
+            if (!userInfo.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+        
+        // 标签页切换功能
+        function showAccountManagement() {
+            // 切换标签页样式
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 显示账号管理内容
+            document.getElementById('accountManagementContent').style.display = 'block';
+            document.getElementById('permissionManagementContent').style.display = 'none';
+        }
+        
+        function showPermissionManagement() {
+            // 切换标签页样式
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 显示权限管理内容
+            document.getElementById('accountManagementContent').style.display = 'none';
+            document.getElementById('permissionManagementContent').style.display = 'block';
+        }
+        
+        // 权限管理功能
+        function openAddPermissionModal() {
+            // 创建模态框
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>新建权限</h3>
+                        <button class="close-btn" onclick="closeModal()">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="permissionForm">
+                            <div class="form-group">
+                                <label>权限名称:</label>
+                                <input type="text" id="permissionName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>权限描述:</label>
+                                <textarea id="permissionDesc" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>模块权限:</label>
+                                <div class="permission-checkboxes">
+                                    <label><input type="checkbox" id="dashboard"> 数据统计</label>
+                                    <label><input type="checkbox" id="myData"> 我的数据</label>
+                                    <label><input type="checkbox" id="dataManagement"> 数据管理</label>
+                                    <label><input type="checkbox" id="systemSettings"> 系统设置</label>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+                        <button class="btn btn-primary" onclick="savePermission()">保存</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        function savePermission() {
+            const name = document.getElementById('permissionName').value;
+            const description = document.getElementById('permissionDesc').value;
+            
+            if (!name) {
+                alert('请输入权限名称');
+                return;
+            }
+            
+            const data = {
+                name: name,
+                description: description,
+                can_view_dashboard: document.getElementById('dashboard').checked,
+                can_view_my_data: document.getElementById('myData').checked,
+                can_view_data_management: document.getElementById('dataManagement').checked,
+                can_view_system_settings: document.getElementById('systemSettings').checked,
+            };
+            
+            fetch('/accounts/api/permission-groups/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert(result.message);
+                    closeModal();
+                    location.reload();
+                } else {
+                    alert(result.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('创建失败，请重试');
+            });
+        }
+        
+        function closeModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                modal.remove();
+            }
+        }
+        
+        function editPermission(permissionName) {
+            // 这里需要根据权限名称获取权限ID，简化处理
+            const permissionId = prompt('请输入权限ID:');
+            if (!permissionId) return;
+            
+            const newName = prompt(`修改权限名称 (当前: ${permissionName}):`, permissionName);
+            if (!newName) return;
+            
+            const newDesc = prompt('修改权限描述:');
+            if (!newDesc) return;
+            
+            const data = {
+                name: newName,
+                description: newDesc,
+                can_view_dashboard: confirm('是否允许访问"数据统计"模块？'),
+                can_view_my_data: confirm('是否允许访问"我的数据"模块？'),
+                can_view_data_management: confirm('是否允许访问"数据管理"模块？'),
+                can_view_system_settings: confirm('是否允许访问"系统设置"模块？'),
+            };
+            
+            fetch(`/accounts/api/permission-groups/${permissionId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert(result.message);
+                    location.reload();
+                } else {
+                    alert(result.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('修改失败，请重试');
+            });
+        }
+        
+        function deletePermission(permissionName) {
+            if (confirm(`确定要删除权限"${permissionName}"吗？此操作不可撤销。`)) {
+                const permissionId = prompt('请输入权限ID:');
+                if (!permissionId) return;
+                
+                fetch(`/accounts/api/permission-groups/${permissionId}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert(result.message);
+                        location.reload();
+                    } else {
+                        alert(result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('删除失败，请重试');
+                });
+            }
+        }
+        
+        // 获取CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // 添加账户
+        function openAddAccountModal() {
+            alert('打开添加账户模态框');
+        }
+        
+        // 启用账户
+        function enableAccount(username) {
+            if (confirm(`确定要启用账户 "${username}" 吗？`)) {
+                alert(`账户 "${username}" 已启用`);
+                // 这里可以添加实际的后端逻辑
+            }
+        }
+        
+        // 禁用账户
+        function disableAccount(username) {
+            if (confirm(`确定要禁用账户 "${username}" 吗？`)) {
+                alert(`账户 "${username}" 已禁用`);
+                // 这里可以添加实际的后端逻辑
+            }
+        }
+        
+        // 编辑账户
+        function editAccount(username) {
+            alert(`编辑账户: ${username}`);
+        }
+        
+        // 删除账户
+        function deleteAccount(username) {
+            if (confirm(`确定要删除账户 "${username}" 吗？此操作不可撤销。`)) {
+                alert(`账户 "${username}" 已删除`);
+                // 这里可以添加实际的后端逻辑
+            }
+        }
+        
+        // 分页功能
+        document.querySelectorAll('.page-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (this.textContent === '<' || this.textContent === '>') {
+                    // 处理上一页/下一页
+                    console.log('翻页:', this.textContent);
+                } else {
+                    // 处理页码点击
+                    document.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    console.log('跳转到第', this.textContent, '页');
+                }
+            });
+        });
+        
+        // 每页条数变化
+        document.querySelector('.page-size-select').addEventListener('change', function() {
+            console.log('每页显示:', this.value, '条');
+        });
+    </script>
+</body>
+</html>

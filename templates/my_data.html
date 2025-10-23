@@ -1,0 +1,1448 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据资产管理系统</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0f1419;
+            color: #ffffff;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* 顶部导航栏 */
+        .top-navbar {
+            background: rgba(15, 20, 25, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0 2rem;
+            height: 60px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .navbar-brand {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        
+        .navbar-brand:hover {
+            color: #4a9eff;
+        }
+        
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .navbar-link {
+            color: #a0a0a0;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+        
+        .navbar-link:hover {
+            color: #ffffff;
+        }
+        
+        .notification-icon {
+            color: #a0a0a0;
+            font-size: 18px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .notification-icon:hover {
+            color: #4a9eff;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #ffffff;
+            font-size: 14px;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #4a9eff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .user-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(30, 30, 50, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+            min-width: 150px;
+            display: none;
+        }
+        
+        .dropdown-item {
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+        
+        /* 左侧边栏 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 60px;
+            width: 250px;
+            height: calc(100vh - 60px);
+            background: rgba(20, 25, 35, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem 0;
+            z-index: 999;
+        }
+        
+        .sidebar-item {
+            display: block;
+            color: #a0a0a0;
+            text-decoration: none;
+            padding: 1rem 2rem;
+            margin: 0.25rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .sidebar-item:hover,
+        .sidebar-item.active {
+            background: rgba(74, 158, 255, 0.2);
+            color: #4a9eff;
+        }
+        
+        .sidebar-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            margin-left: 250px;
+            margin-top: 60px;
+            padding: 2rem;
+            min-height: calc(100vh - 60px);
+        }
+        
+        /* 页面标题 */
+        .page-title {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+        
+        /* 统计卡片 */
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: rgba(30, 30, 50, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(5px);
+            text-align: center;
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+            color: #4a9eff;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+        
+        /* 数据表格 */
+        .data-table-container {
+            background: rgba(30, 30, 50, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(5px);
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .table-title {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .search-input {
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 200px;
+        }
+        
+        .search-input::placeholder {
+            color: #a0a0a0;
+        }
+        
+        .search-btn {
+            background: #4a9eff;
+            border: none;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .search-btn:hover {
+            background: #357abd;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .data-table th {
+            color: #ffffff;
+            font-weight: 600;
+            background: rgba(40, 40, 60, 0.5);
+        }
+        
+        .data-table td {
+            color: #a0a0a0;
+        }
+        
+        .data-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .action-btn {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #a0a0a0;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 0.25rem;
+        }
+        
+        .action-btn:hover {
+            background: #4a9eff;
+            color: #ffffff;
+            border-color: #4a9eff;
+        }
+        
+        .action-btn.danger:hover {
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+        
+        /* 分页 */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .pagination-info {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .page-btn {
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #a0a0a0;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .page-btn:hover,
+        .page-btn.active {
+            background: #4a9eff;
+            color: #ffffff;
+            border-color: #4a9eff;
+        }
+        
+        .page-input {
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 80px;
+            text-align: center;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .stats-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-box {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .search-input {
+                width: 100%;
+            }
+        }
+        
+        /* 预览模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal.show {
+            display: block;
+        }
+        
+        .preview-modal-content {
+            background: linear-gradient(135deg, rgba(20, 20, 35, 0.95), rgba(30, 30, 50, 0.95));
+            margin: 2% auto;
+            padding: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 1000px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .preview-title {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .preview-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .preview-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 500px;
+        }
+        
+        .preview-left {
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .preview-thumbnail {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .thumbnail-placeholder {
+            text-align: center;
+            color: #666;
+        }
+        
+        .thumbnail-placeholder i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+        
+        .preview-right {
+            background: rgba(40, 40, 60, 0.3);
+            padding: 2rem;
+        }
+        
+        .preview-model-title {
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+        
+        .info-section {
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .info-label {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+        
+        .info-value {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .preview-description {
+            padding: 0 0 2rem 0;
+        }
+        
+        .description-label {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .description-content {
+            color: #a0a0a0;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 1rem;
+            background: rgba(40, 40, 60, 0.5);
+            border-radius: 6px;
+            min-height: 60px;
+        }
+        
+        .close {
+            color: #a0a0a0;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .close:hover {
+            color: #ffffff;
+        }
+        
+        .btn-outline-primary {
+            background: transparent;
+            border: 1px solid #4a9eff;
+            color: #4a9eff;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-outline-primary:hover {
+            background: #4a9eff;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="top-navbar">
+        <a href="{% url 'accounts:dashboard' %}" class="navbar-brand">
+            <i class="fas fa-cube me-2"></i>
+            三维数据资产管理系统
+        </a>
+        
+        <div class="navbar-right">
+            <a href="#" class="navbar-link"></a>
+            <i class="fas fa-bell notification-icon"></i>
+            <div class="user-dropdown">
+                <div class="user-info" onclick="toggleDropdown()">
+                    <div class="user-avatar">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <span>超级管理员</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="dropdown-menu" id="userDropdown">
+                    <a href="{% url 'accounts:person' %}" class="dropdown-item">
+                        <i class="fas fa-user me-2"></i>
+                        个人中心
+                    </a>
+                    <a href="{% url 'accounts:logout' %}" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt me-2"></i>
+                        退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 左侧边栏 -->
+    <aside class="sidebar">
+        <a href="{% url 'accounts:dashboard' %}" class="sidebar-item">
+            <i class="fas fa-chart-bar"></i>
+            数据统计
+        </a>
+        <a href="{% url 'accounts:my_data' %}" class="sidebar-item active">
+            <i class="fas fa-folder"></i>
+            我的数据
+        </a>
+        <a href="{% url 'accounts:data_management' %}" class="sidebar-item">
+            <i class="fas fa-list"></i>
+            数据管理
+        </a>
+        <a href="{% url 'accounts:system_settings' %}" class="sidebar-item">
+            <i class="fas fa-cog"></i>
+            系统设置
+        </a>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+{#        <h1 class="page-title"></h1>#}
+        
+        <!-- 统计卡片 -->
+        <div class="stats-cards">
+            <div class="stat-card">
+                <i class="fas fa-upload stat-icon"></i>
+                <div class="stat-number">{{ total_uploads }}</div>
+                <div class="stat-label">我的上传数据</div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-download stat-icon"></i>
+                <div class="stat-number">{{ total_downloads }}</div>
+                <div class="stat-label">我的下载数据</div>
+            </div>
+        </div>
+        
+        <!-- 我的上传记录 -->
+        <div class="data-table-container">
+            <div class="table-header">
+                <h3 class="table-title">我的上传记录</h3>
+                <div class="search-box">
+                    <input type="text" class="search-input" id="uploadSearchInput" placeholder="搜索文件名..." onkeyup="searchUploads(this.value)">
+                    <button class="search-btn" onclick="searchUploads(document.getElementById('uploadSearchInput').value)">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <table class="data-table" id="uploadTable">
+                <thead>
+                    <tr>
+                        <th>文件名</th>
+                        <th>文件类型</th>
+                        <th>文件大小</th>
+                        <th>上传时间</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="uploadTableBody">
+                    {% for upload in user_uploads %}
+                    <tr>
+                        <td>{{ upload.filename }}</td>
+                        <td>
+                            {% if ".mp4" in upload.filename|lower or ".webm" in upload.filename|lower %}
+                                视频文件
+                            {% elif ".png" in upload.filename|lower or ".jpg" in upload.filename|lower or ".jpeg" in upload.filename|lower %}
+                                图片文件
+                            {% else %}
+                                其他文件
+                            {% endif %}
+                        </td>
+                        <td>{{ upload.file_size|filesizeformat }}</td>
+                        <td>{{ upload.upload_time|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            {% if upload.status == 'success' %}
+                                <span style="color: #28a745;">已审核</span>
+                            {% else %}
+                                <span style="color: #ffc107;">审核中</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="action-btn" onclick="viewUploadLog({{ upload.id }})">查看</button>
+                            <button class="action-btn" onclick="downloadUploadLog({{ upload.id }})">下载</button>
+                            <button class="action-btn danger" onclick="deleteUploadLog({{ upload.id }})">删除</button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #a0a0a0; padding: 2rem;">
+                            暂无上传记录
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div class="pagination">
+                <div class="pagination-info">
+                    显示第 {{ user_uploads.start_index }}-{{ user_uploads.end_index }} 条，共 {{ total_uploads }} 条记录
+                </div>
+                <div class="pagination-controls">
+                    {% if user_uploads.has_previous %}
+                        <button class="page-btn" onclick="window.location.href='?upload_page={{ user_uploads.previous_page_number }}'">&lt;</button>
+                    {% endif %}
+                    
+                    {% for num in user_uploads.paginator.page_range %}
+                        {% if num == user_uploads.number %}
+                            <button class="page-btn active">{{ num }}</button>
+                        {% elif num <= 5 or num > user_uploads.paginator.num_pages|add:"-5" or num|add:"-5" <= user_uploads.number and user_uploads.number <= num|add:"5" %}
+                            <button class="page-btn" onclick="window.location.href='?upload_page={{ num }}'">{{ num }}</button>
+                        {% elif num == 6 and user_uploads.number > 8 %}
+                            <span style="color: #a0a0a0; margin: 0 0.5rem;">...</span>
+                        {% elif num == user_uploads.paginator.num_pages|add:"-5" and user_uploads.number < user_uploads.paginator.num_pages|add:"-7" %}
+                            <span style="color: #a0a0a0; margin: 0 0.5rem;">...</span>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if user_uploads.has_next %}
+                        <button class="page-btn" onclick="window.location.href='?upload_page={{ user_uploads.next_page_number }}'">&gt;</button>
+                    {% endif %}
+                    
+                    <span style="color: #a0a0a0; margin: 0 0.5rem;">跳至</span>
+                    <input type="number" class="page-input" value="{{ user_uploads.number }}" min="1" max="{{ user_uploads.paginator.num_pages }}">
+                    <span style="color: #a0a0a0; margin-left: 0.5rem;">页</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 我的下载记录 -->
+        <div class="data-table-container" style="margin-top: 2rem;">
+            <div class="table-header">
+                <h3 class="table-title">我的下载记录</h3>
+                <div class="search-box">
+                    <input type="text" class="search-input" id="downloadSearchInput" placeholder="搜索文件名..." onkeyup="searchDownloads(this.value)">
+                    <button class="search-btn" onclick="searchDownloads(document.getElementById('downloadSearchInput').value)">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <table class="data-table" id="downloadTable">
+                <thead>
+                    <tr>
+                        <th>文件名</th>
+                        <th>文件类型</th>
+                        <th>下载时间</th>
+                        <th>下载来源</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="downloadTableBody">
+                    {% for download in user_downloads %}
+                    <tr>
+                        <td>{{ download.filename }}</td>
+                        <td>
+                            {% if ".mp4" in download.filename|lower or ".webm" in download.filename|lower %}
+                                视频文件
+                            {% elif ".png" in download.filename|lower or ".jpg" in download.filename|lower or ".jpeg" in download.filename|lower %}
+                                图片文件
+                            {% else %}
+                                其他文件
+                            {% endif %}
+                        </td>
+                        <td>{{ download.download_time|date:"Y-m-d H:i" }}</td>
+                        <td>{{ download.download_source|default:"数据管理" }}</td>
+                        <td>
+                            <button class="action-btn" onclick="viewDownloadLog({{ download.id }})">查看</button>
+                            <button class="action-btn" onclick="redownloadLog({{ download.id }})">重新下载</button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #a0a0a0; padding: 2rem;">
+                            暂无下载记录
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div class="pagination">
+                <div class="pagination-info">
+                    显示第 {{ user_downloads.start_index }}-{{ user_downloads.end_index }} 条，共 {{ total_downloads }} 条记录
+                </div>
+                <div class="pagination-controls">
+                    {% if user_downloads.has_previous %}
+                        <button class="page-btn" onclick="window.location.href='?download_page={{ user_downloads.previous_page_number }}'">&lt;</button>
+                    {% endif %}
+                    
+                    {% for num in user_downloads.paginator.page_range %}
+                        {% if num == user_downloads.number %}
+                            <button class="page-btn active">{{ num }}</button>
+                        {% elif num <= 5 or num > user_downloads.paginator.num_pages|add:"-5" or num|add:"-5" <= user_downloads.number and user_downloads.number <= num|add:"5" %}
+                            <button class="page-btn" onclick="window.location.href='?download_page={{ num }}'">{{ num }}</button>
+                        {% elif num == 6 and user_downloads.number > 8 %}
+                            <span style="color: #a0a0a0; margin: 0 0.5rem;">...</span>
+                        {% elif num == user_downloads.paginator.num_pages|add:"-5" and user_downloads.number < user_downloads.paginator.num_pages|add:"-7" %}
+                            <span style="color: #a0a0a0; margin: 0 0.5rem;">...</span>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if user_downloads.has_next %}
+                        <button class="page-btn" onclick="window.location.href='?download_page={{ user_downloads.next_page_number }}'">&gt;</button>
+                    {% endif %}
+                    
+                    <span style="color: #a0a0a0; margin: 0 0.5rem;">跳至</span>
+                    <input type="number" class="page-input" value="{{ user_downloads.number }}" min="1" max="{{ user_downloads.paginator.num_pages }}">
+                    <span style="color: #a0a0a0; margin-left: 0.5rem;">页</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 预览模态框 -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content preview-modal-content">
+            <div class="preview-header">
+                <h3 class="preview-title">上传数据</h3>
+                <div class="preview-actions">
+                    <button class="btn btn-outline-primary" onclick="toggleFullscreen()">全屏</button>
+                    <span class="close" onclick="closePreviewModal()">&times;</span>
+                </div>
+            </div>
+            
+            <div class="preview-content">
+                <div class="preview-left">
+                    <div class="preview-thumbnail">
+                        <div class="thumbnail-placeholder">
+                            <i class="fas fa-image"></i>
+                            <span>无预览图</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="preview-right">
+                    <div class="preview-details">
+                        <h4 class="preview-model-title" id="previewModelTitle">测试模型002</h4>
+                        
+                        <div class="info-section">
+                            <h5 class="section-title">基础信息</h5>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <span class="info-label">文件格式:</span>
+                                    <span class="info-value" id="previewFileFormat">zip</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">来源:</span>
+                                    <span class="info-value" id="previewSource">内部</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">地理位置:</span>
+                                    <span class="info-value" id="previewLocation">新加坡</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">项目归属:</span>
+                                    <span class="info-value" id="previewProject">高德</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">是否有使用侵权风险:</span>
+                                    <span class="info-value" id="previewInfringement">不侵权</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">创建人:</span>
+                                    <span class="info-value" id="previewCreator">超级管理员</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">创建时间:</span>
+                                    <span class="info-value" id="previewCreateTime">2025-08-05 15:32:49</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">模型等级:</span>
+                                    <span class="info-value" id="previewLevel">保密</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-section">
+                            <h5 class="section-title">简介或使用建议</h5>
+                            <div class="preview-description">
+                                <span class="description-label">简介或使用建议:</span>
+                                <div class="description-content" id="previewDescription">暂无描述</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 用户下拉菜单
+        function toggleDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+        
+        // 点击外部关闭下拉菜单
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const userInfo = document.querySelector('.user-info');
+            if (!userInfo.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+        
+        // 搜索功能
+        document.querySelectorAll('.search-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const input = this.previousElementSibling;
+                const searchTerm = input.value.toLowerCase();
+                const table = this.closest('.data-table-container').querySelector('.data-table tbody');
+                const rows = table.querySelectorAll('tr');
+                
+                rows.forEach(row => {
+                    const fileName = row.cells[0].textContent.toLowerCase();
+                    if (fileName.includes(searchTerm)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+        
+        // 分页功能
+        document.querySelectorAll('.page-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (this.textContent === '<' || this.textContent === '>') {
+                    // 处理上一页/下一页
+                    console.log('切换页面:', this.textContent);
+                } else {
+                    // 处理页码点击
+                    const container = this.closest('.pagination-controls');
+                    container.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+        
+        // 操作按钮（保留原有逻辑作为备用）
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            // 如果按钮已经有onclick属性，跳过
+            if (btn.getAttribute('onclick')) {
+                return;
+            }
+            
+            btn.addEventListener('click', function() {
+                const action = this.textContent.trim();
+                const fileName = this.closest('tr').cells[0].textContent;
+                
+                switch(action) {
+                    case '查看':
+                        alert(`查看文件: ${fileName}`);
+                        break;
+                    case '下载':
+                    case '重新下载':
+                        alert(`下载文件: ${fileName}`);
+                        break;
+                    case '删除':
+                        if (confirm(`确定要删除文件 "${fileName}" 吗？`)) {
+                            alert(`删除文件: ${fileName}`);
+                        }
+                        break;
+                }
+            });
+        });
+        
+        // 新增的动态操作函数
+        function viewUploadLog(logId) {
+            // 获取上传记录详情并显示预览弹窗
+            fetch(`/api/upload-logs/${logId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        populatePreviewModal(data.data);
+                        openPreviewModal();
+                    } else {
+                        alert('获取记录失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('获取记录失败，请重试');
+                });
+        }
+        
+        function openPreviewModal() {
+            const modal = document.getElementById('previewModal');
+            modal.classList.add('show');
+        }
+        
+        function closePreviewModal() {
+            const modal = document.getElementById('previewModal');
+            modal.classList.remove('show');
+        }
+        
+        function populatePreviewModal(data) {
+            try {
+                // 设置基本信息
+                document.getElementById('previewModelTitle').textContent = data.filename || '未知文件';
+                
+                // 如果有关联的模型数据，使用模型信息（与数据管理中的基本信息一致）
+                if (data.related_model || data.source_model) {
+                    const model = data.related_model || data.source_model;
+                    
+                    // 使用模型名称作为标题
+                    document.getElementById('previewModelTitle').textContent = model.name || data.filename;
+                    
+                    // 文件格式：从媒体文件获取
+                    if (model.media_files && model.media_files.length > 0) {
+                        const firstFile = model.media_files[0];
+                        document.getElementById('previewFileFormat').textContent = getFileExtension(firstFile.name);
+                    } else {
+                        document.getElementById('previewFileFormat').textContent = getFileExtension(data.filename);
+                    }
+                    
+                    // 来源：与数据管理中上传时选择的一致
+                    document.getElementById('previewSource').textContent = model.source === 'internal' ? '内部' : '外部';
+                    
+                    // 地理位置：与数据管理中上传时选择的一致
+                    document.getElementById('previewLocation').textContent = model.location_tag ? model.location_tag.name : '未设置';
+                    
+                    // 项目归属：与数据管理中上传时选择的一致
+                    document.getElementById('previewProject').textContent = model.project_tag ? model.project_tag.name : '未设置';
+                    
+                    // 侵权风险：与数据管理中上传时选择的一致
+                    document.getElementById('previewInfringement').textContent = model.infringement_risk === 'no' ? '不侵权' : '有风险';
+                    
+                    // 创建人：与数据管理中上传时记录的一致
+                    document.getElementById('previewCreator').textContent = model.created_by ? (model.created_by.display_name || model.created_by.username) : '未知';
+                    
+                    // 创建时间：与数据管理中上传时记录的一致
+                    document.getElementById('previewCreateTime').textContent = formatDateTime(model.created_at);
+                    
+                    // 模型等级：与数据管理中上传时选择的一致
+                    let levelText = '未知';
+                    if (model.model_level === 'confidential') {
+                        levelText = '保密';
+                    } else if (model.model_level === 'important') {
+                        levelText = '重要';
+                    } else if (model.model_level === 'normal') {
+                        levelText = '普通';
+                    }
+                    document.getElementById('previewLevel').textContent = levelText;
+                    
+                    // 描述：与数据管理中上传时填写的一致
+                    document.getElementById('previewDescription').textContent = model.description || '暂无描述';
+                    
+                    // 设置预览图
+                    if (model.media_files && model.media_files.length > 0) {
+                        const mediaFile = model.media_files[0];
+                        if (isImageFile(mediaFile.name)) {
+                            const thumbnail = document.querySelector('.preview-thumbnail');
+                            thumbnail.innerHTML = `<img src="/media/${mediaFile.path}" alt="预览图" style="max-width: 100%; max-height: 100%; object-fit: contain;">`;
+                        }
+                    }
+                } else {
+                    // 只有记录，没有关联模型（这种情况不应该发生，因为现在上传时会关联模型）
+                    document.getElementById('previewFileFormat').textContent = getFileExtension(data.filename);
+                    document.getElementById('previewSource').textContent = '未知';
+                    document.getElementById('previewLocation').textContent = '未设置';
+                    document.getElementById('previewProject').textContent = '未设置';
+                    document.getElementById('previewInfringement').textContent = '未知';
+                    document.getElementById('previewCreator').textContent = '未知';
+                    document.getElementById('previewCreateTime').textContent = formatDateTime(data.upload_time || data.download_time);
+                    document.getElementById('previewLevel').textContent = '未知';
+                    document.getElementById('previewDescription').textContent = '暂无描述';
+                }
+            } catch (error) {
+                console.error('Error populating preview modal:', error);
+            }
+        }
+        
+        function getFileExtension(filename) {
+            if (!filename) return '未知';
+            const ext = filename.split('.').pop().toLowerCase();
+            return ext;
+        }
+        
+        function isImageFile(filename) {
+            if (!filename) return false;
+            const imageExts = ['jpg', 'jpeg', 'png', 'bmp', 'tga'];
+            const ext = filename.split('.').pop().toLowerCase();
+            return imageExts.includes(ext);
+        }
+        
+        function formatDateTime(dateString) {
+            if (!dateString) return '未知';
+            const date = new Date(dateString);
+            return date.toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+        }
+        
+        function toggleFullscreen() {
+            const modal = document.getElementById('previewModal');
+            if (!document.fullscreenElement) {
+                modal.requestFullscreen().catch(err => {
+                    console.log('无法进入全屏模式:', err);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+        
+        function downloadUploadLog(logId) {
+            // 获取上传记录详情并下载
+            fetch(`/api/upload-logs/${logId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const log = data.data;
+                        // 如果有关联的模型，使用下载API创建下载记录
+                        if (log.related_model) {
+                            fetch(`/api/data-models/${log.related_model.id}/download/`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRFToken': getCookie('csrftoken')
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(result => {
+                                if (result.success) {
+                                    // 创建下载链接
+                                    result.downloads.forEach(download => {
+                                        const link = document.createElement('a');
+                                        link.href = download.url;
+                                        link.download = download.filename;
+                                        document.body.appendChild(link);
+                                        link.click();
+                                        document.body.removeChild(link);
+                                    });
+                                    alert('下载完成，下载记录已创建');
+                                } else {
+                                    alert('下载失败: ' + result.message);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('下载失败，请重试');
+                            });
+                        } else {
+                            // 没有关联模型，直接下载文件
+                            alert(`下载文件：${log.filename}`);
+                        }
+                    } else {
+                        alert('下载失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('下载失败，请重试');
+                });
+        }
+        
+        function deleteUploadLog(logId) {
+            if (confirm('确定要删除这条上传记录吗？此操作只删除记录，不会删除实际文件。')) {
+                fetch(`/api/upload-logs/${logId}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert('上传记录删除成功');
+                        location.reload(); // 刷新页面
+                    } else {
+                        alert(result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('删除失败，请重试');
+                });
+            }
+        }
+        
+        function viewDownloadLog(logId) {
+            // 获取下载记录详情并显示预览弹窗
+            fetch(`/api/download-logs/${logId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        populatePreviewModal(data.data);
+                        openPreviewModal();
+                    } else {
+                        alert('获取记录失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('获取记录失败，请重试');
+                });
+        }
+        
+        function redownloadLog(logId) {
+            // 获取下载记录详情并重新下载
+            fetch(`/api/download-logs/${logId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const log = data.data;
+                        // 如果有关联的模型，使用下载API重新下载
+                        if (log.source_model) {
+                            fetch(`/api/data-models/${log.source_model.id}/download/`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRFToken': getCookie('csrftoken')
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(result => {
+                                if (result.success) {
+                                    // 创建下载链接
+                                    result.downloads.forEach(download => {
+                                        const link = document.createElement('a');
+                                        link.href = download.url;
+                                        link.download = download.filename;
+                                        document.body.appendChild(link);
+                                        link.click();
+                                        document.body.removeChild(link);
+                                    });
+                                    alert('重新下载完成，新的下载记录已创建');
+                                } else {
+                                    alert('重新下载失败: ' + result.message);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                alert('重新下载失败，请重试');
+                            });
+                        } else {
+                            // 没有关联模型，直接下载文件
+                            alert(`重新下载文件：${log.filename}`);
+                        }
+                    } else {
+                        alert('重新下载失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('重新下载失败，请重试');
+                });
+        }
+        
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('previewModal');
+            if (event.target === modal) {
+                closePreviewModal();
+            }
+        }
+        
+        // ESC键关闭模态框
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closePreviewModal();
+            }
+        });
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // 搜索功能
+        let allUploads = [];
+        let allDownloads = [];
+        
+        // 页面加载时保存所有数据
+        document.addEventListener('DOMContentLoaded', function() {
+            // 保存上传记录数据
+            const uploadRows = document.querySelectorAll('#uploadTableBody tr');
+            uploadRows.forEach(row => {
+                if (row.cells.length > 0) {
+                    allUploads.push({
+                        filename: row.cells[0].textContent.trim(),
+                        fileType: row.cells[1].textContent.trim(),
+                        fileSize: row.cells[2].textContent.trim(),
+                        uploadTime: row.cells[3].textContent.trim(),
+                        status: row.cells[4].textContent.trim(),
+                        actions: row.cells[5].innerHTML,
+                        row: row
+                    });
+                }
+            });
+            
+            // 保存下载记录数据
+            const downloadRows = document.querySelectorAll('#downloadTableBody tr');
+            downloadRows.forEach(row => {
+                if (row.cells.length > 0) {
+                    allDownloads.push({
+                        filename: row.cells[0].textContent.trim(),
+                        fileType: row.cells[1].textContent.trim(),
+                        downloadTime: row.cells[2].textContent.trim(),
+                        downloadSource: row.cells[3].textContent.trim(),
+                        actions: row.cells[4].innerHTML,
+                        row: row
+                    });
+                }
+            });
+        });
+        
+        // 搜索上传记录
+        function searchUploads(searchTerm) {
+            const tbody = document.getElementById('uploadTableBody');
+            const searchLower = searchTerm.toLowerCase();
+            
+            if (searchTerm === '') {
+                // 显示所有记录
+                allUploads.forEach(item => {
+                    item.row.style.display = '';
+                });
+            } else {
+                // 过滤记录
+                allUploads.forEach(item => {
+                    if (item.filename.toLowerCase().includes(searchLower)) {
+                        item.row.style.display = '';
+                    } else {
+                        item.row.style.display = 'none';
+                    }
+                });
+            }
+            
+            // 更新显示状态
+            updateUploadDisplay();
+        }
+        
+        // 搜索下载记录
+        function searchDownloads(searchTerm) {
+            const tbody = document.getElementById('downloadTableBody');
+            const searchLower = searchTerm.toLowerCase();
+            
+            if (searchTerm === '') {
+                // 显示所有记录
+                allDownloads.forEach(item => {
+                    item.row.style.display = '';
+                });
+            } else {
+                // 过滤记录
+                allDownloads.forEach(item => {
+                    if (item.filename.toLowerCase().includes(searchLower)) {
+                        item.row.style.display = '';
+                    } else {
+                        item.row.style.display = 'none';
+                    }
+                });
+            }
+            
+            // 更新显示状态
+            updateDownloadDisplay();
+        }
+        
+        // 更新上传记录显示状态
+        function updateUploadDisplay() {
+            const visibleRows = document.querySelectorAll('#uploadTableBody tr[style=""]').length;
+            const hiddenRows = document.querySelectorAll('#uploadTableBody tr[style="display: none;"]').length;
+            
+            // 如果没有可见行，显示"无搜索结果"
+            if (visibleRows === 0 && hiddenRows > 0) {
+                const tbody = document.getElementById('uploadTableBody');
+                let noResultsRow = tbody.querySelector('.no-results');
+                if (!noResultsRow) {
+                    noResultsRow = document.createElement('tr');
+                    noResultsRow.className = 'no-results';
+                    noResultsRow.innerHTML = '<td colspan="6" style="text-align: center; color: #a0a0a0; padding: 2rem;">未找到匹配的文件</td>';
+                    tbody.appendChild(noResultsRow);
+                }
+                noResultsRow.style.display = '';
+            } else {
+                const noResultsRow = document.querySelector('#uploadTableBody .no-results');
+                if (noResultsRow) {
+                    noResultsRow.style.display = 'none';
+                }
+            }
+        }
+        
+        // 更新下载记录显示状态
+        function updateDownloadDisplay() {
+            const visibleRows = document.querySelectorAll('#downloadTableBody tr[style=""]').length;
+            const hiddenRows = document.querySelectorAll('#downloadTableBody tr[style="display: none;"]').length;
+            
+            // 如果没有可见行，显示"无搜索结果"
+            if (visibleRows === 0 && hiddenRows > 0) {
+                const tbody = document.getElementById('downloadTableBody');
+                let noResultsRow = tbody.querySelector('.no-results');
+                if (!noResultsRow) {
+                    noResultsRow = document.createElement('tr');
+                    noResultsRow.className = 'no-results';
+                    noResultsRow.innerHTML = '<td colspan="5" style="text-align: center; color: #a0a0a0; padding: 2rem;">未找到匹配的文件</td>';
+                    tbody.appendChild(noResultsRow);
+                }
+                noResultsRow.style.display = '';
+            } else {
+                const noResultsRow = document.querySelector('#downloadTableBody .no-results');
+                if (noResultsRow) {
+                    noResultsRow.style.display = 'none';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

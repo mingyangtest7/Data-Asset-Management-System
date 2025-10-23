@@ -1,0 +1,4053 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据资产管理系统</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0f1419;
+            color: #ffffff;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* 顶部导航栏 */
+        .top-navbar {
+            background: rgba(15, 20, 25, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0 2rem;
+            height: 60px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .navbar-brand {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        
+        .navbar-brand:hover {
+            color: #4a9eff;
+        }
+        
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .navbar-link {
+            color: #a0a0a0;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+        
+        .navbar-link:hover {
+            color: #ffffff;
+        }
+        
+        .notification-icon {
+            color: #a0a0a0;
+            font-size: 18px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .notification-icon:hover {
+            color: #4a9eff;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #ffffff;
+            font-size: 14px;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #4a9eff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .user-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(30, 30, 50, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+            min-width: 150px;
+            display: none;
+        }
+        
+        .dropdown-item {
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+        
+        /* 左侧边栏 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 60px;
+            width: 250px;
+            height: calc(100vh - 60px);
+            background: rgba(20, 25, 35, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem 0;
+            z-index: 999;
+        }
+        
+        .sidebar-item {
+            display: block;
+            color: #a0a0a0;
+            text-decoration: none;
+            padding: 1rem 2rem;
+            margin: 0.25rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .sidebar-item:hover,
+        .sidebar-item.active {
+            background: rgba(74, 158, 255, 0.2);
+            color: #4a9eff;
+        }
+        
+        .sidebar-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            margin-left: 250px;
+            margin-top: 60px;
+            padding: 2rem;
+            min-height: calc(100vh - 60px);
+        }
+        
+        /* 页面标题 */
+        .page-title {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+        
+        /* 标签页导航 */
+        .nav-tabs {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .nav-tabs .nav-link {
+            color: #a0a0a0;
+            border: none;
+            background: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tabs .nav-link:hover,
+        .nav-tabs .nav-link.active {
+            color: #4a9eff;
+            background: none;
+            border-bottom: 2px solid #4a9eff;
+        }
+        
+        /* 工具栏 */
+        .toolbar {
+            background: rgba(30, 30, 50, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(5px);
+        }
+        
+        .filter-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 2rem;
+        }
+        
+        .filter-row {
+            display: flex;
+            gap: 2rem;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .filter-label {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #a0a0a0;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .radio-item input[type="radio"] {
+            accent-color: #4a9eff;
+        }
+        
+        .radio-item span {
+            transition: color 0.3s ease;
+        }
+        
+        .radio-item:hover span {
+            color: #ffffff;
+        }
+        
+        .search-input {
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 200px;
+        }
+        
+        .search-input::placeholder {
+            color: #a0a0a0;
+        }
+        
+        .filter-select {
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 150px;
+        }
+        
+        .date-range {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .date-input {
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 150px;
+        }
+        
+        .date-separator {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+        
+        .filter-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .upload-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .upload-btn {
+            background: #4a9eff;
+            border: none;
+            color: #ffffff;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+        
+        .upload-btn:hover {
+            background: #357abd;
+        }
+        
+        /* 批量操作栏 */
+        .batch-actions {
+            margin-bottom: 1.5rem;
+        }
+        
+        .btn-outline-primary {
+            background: transparent;
+            border: 1px solid #4a9eff;
+            color: #4a9eff;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-outline-primary:hover {
+            background: #4a9eff;
+            color: #ffffff;
+        }
+        
+        .btn-outline-danger {
+            background: transparent;
+            border: 1px solid #dc3545;
+            color: #dc3545;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-outline-danger:hover {
+            background: #dc3545;
+            color: #ffffff;
+        }
+        
+        .btn-outline-secondary {
+            background: transparent;
+            border: 1px solid #6c757d;
+            color: #6c757d;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-outline-secondary:hover {
+            background: #6c757d;
+            color: #ffffff;
+        }
+        
+        .batch-actions {
+            background: rgba(30, 30, 50, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .batch-confirm {
+            background: rgba(30, 30, 50, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .batch-info {
+            color: #ffffff;
+            font-size: 14px;
+        }
+        
+        .batch-count {
+            font-weight: 600;
+        }
+        
+        .batch-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .btn-primary {
+            background: #4a9eff;
+            border: 1px solid #4a9eff;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary:hover {
+            background: #3a8eef;
+            border-color: #3a8eef;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            border: 1px solid #6c757d;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+            border-color: #5a6268;
+        }
+        
+        /* 模型网格 */
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .model-item {
+            background: rgba(30, 30, 50, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .model-item.selected {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.3);
+        }
+        
+        .model-selector {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            z-index: 10;
+        }
+        
+        .model-checkbox {
+            width: 18px;
+            height: 18px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #ffffff;
+            border-radius: 3px;
+            cursor: pointer;
+            appearance: none;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .model-checkbox:checked {
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+        
+        .model-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .model-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            border-color: #4a9eff;
+        }
+        
+        .model-thumbnail {
+            width: 100%;
+            height: 150px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .model-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .model-item:hover .model-thumbnail img {
+            transform: scale(1.05);
+        }
+        
+        .placeholder-thumbnail {
+            width: 100%;
+            height: 100%;
+            background: rgba(40, 40, 60, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a0a0a0;
+            font-size: 3rem;
+        }
+        
+        .model-info {
+            padding: 1rem;
+        }
+        
+        .model-title {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .model-meta {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .model-source, .model-level {
+            background: rgba(74, 158, 255, 0.2);
+            color: #4a9eff;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        .no-data {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem;
+            color: #a0a0a0;
+        }
+        
+        .no-data i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* 模态框基础样式 */
+        .modal {
+            display: none !important;
+            position: fixed;
+            z-index: 99999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal.show {
+            display: block !important;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, rgba(20, 20, 35, 0.95), rgba(30, 30, 50, 0.95));
+            margin: 2% auto;
+            padding: 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* 预览模态框样式 */
+        .preview-modal-content {
+            width: 90vw;
+            max-width: 1200px;
+            height: 90vh;
+            max-height: 800px;
+            background: rgba(30, 30, 50, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 0;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* 预览区域样式 */
+        .preview-section {
+            flex: 1;
+            padding: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, rgba(20, 20, 35, 0.95), rgba(30, 30, 50, 0.95));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .single-preview-container {
+            width: 100%;
+            height: 100%;
+            max-height: 400px;
+        }
+        
+        .preview-media-container {
+            width: 100%;
+            height: 100%;
+            background: rgba(40, 40, 60, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .preview-media-container img,
+        .preview-media-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .preview-media-container .no-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #a0a0a0;
+            font-size: 1.4rem;
+            gap: 1rem;
+        }
+        
+        .preview-media-container .no-preview i {
+            font-size: 4rem;
+            color: #666;
+        }
+        
+        .preview-left {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+        
+        .thumbnail-display {
+            width: 100%;
+            height: 250px;
+            position: relative;
+        }
+        
+        .thumbnail-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(40, 40, 60, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .thumbnail-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .thumbnail-container:hover img {
+            transform: scale(1.05);
+        }
+        
+        .thumbnail-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #a0a0a0;
+            gap: 1rem;
+        }
+        
+        .thumbnail-placeholder i {
+            font-size: 3rem;
+            color: #666;
+        }
+        
+        .thumbnail-placeholder span {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .preview-right {
+            position: relative;
+        }
+        
+        .preview-image-container {
+            width: 100%;
+            height: 400px;
+            background: rgba(40, 40, 60, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .preview-image-container img,
+        .preview-image-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .preview-image-container .no-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #a0a0a0;
+            font-size: 1.4rem;
+            gap: 1rem;
+        }
+        
+        .preview-image-container .no-preview i {
+            font-size: 4rem;
+            color: #666;
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .preview-title-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .preview-title {
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .edit-icon {
+            color: #a0a0a0;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            font-size: 16px;
+        }
+        
+        .edit-icon:hover {
+            color: #4a9eff;
+        }
+        
+        .preview-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: #ffffff;
+            border: 1px solid #dc3545;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+            border-color: #c82333;
+        }
+        
+        .preview-details {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .preview-details {
+            padding: 2rem;
+            background: rgba(30, 30, 50, 0.8);
+            width: 100%;
+        }
+        
+        .info-section {
+            margin-bottom: 2rem;
+        }
+        
+        .section-title {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .preview-details {
+            width: 100%;
+        }
+
+        .info-section {
+            width: 100%;
+        }
+
+        .info-grid-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1rem 0;
+            width: 100%;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: rgba(40, 40, 60, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            min-height: 50px;
+            flex: 1;
+        }
+        
+        .info-label {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+        
+        .info-value {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .preview-description {
+            padding: 0 2rem 2rem;
+        }
+        
+        .description-label {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .description-content {
+            color: #a0a0a0;
+            font-size: 14px;
+            line-height: 1.5;
+            padding: 1rem;
+            background: rgba(40, 40, 60, 0.5);
+            border-radius: 6px;
+            min-height: 60px;
+        }
+        
+        /* 编辑模态框样式 */
+        .edit-modal-content {
+            width: 95%;
+            max-width: 1200px;
+            max-height: 95vh;
+            overflow-y: auto;
+            background: rgba(30, 30, 50, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 0;
+            backdrop-filter: blur(10px);
+        }
+        
+        .edit-form-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            padding: 1.5rem;
+        }
+        
+        .form-left {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .form-right {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .form-section {
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        
+        .form-section-title {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .form-label.required::after {
+            content: " *";
+            color: #dc3545;
+        }
+        
+        .form-control {
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: #ffffff;
+            padding: 0.75rem;
+            font-size: 14px;
+            width: 100%;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #4a9eff;
+            box-shadow: 0 0 0 2px rgba(74, 158, 255, 0.2);
+        }
+        
+        .form-control::placeholder {
+            color: #a0a0a0;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #ffffff;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .radio-item input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #4a9eff;
+        }
+        
+        .cascade-selects {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .cascade-selects .form-control {
+            flex: 1;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+            position: relative;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .file-upload-area:hover {
+            border-color: #4a9eff;
+        }
+        
+        .file-upload-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .file-upload-icon {
+            font-size: 2rem;
+            color: #a0a0a0;
+        }
+        
+        .file-upload-text {
+            color: #a0a0a0;
+            font-size: 14px;
+            margin: 0;
+        }
+        
+        .preview-image {
+            width: 100%;
+            height: 100px;
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: #a0a0a0;
+        }
+        
+        .preview-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+        
+        .remove-media-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: #dc3545;
+            color: #ffffff;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .file-requirements {
+            margin-top: 0.5rem;
+            font-size: 12px;
+            color: #a0a0a0;
+        }
+        
+        .file-requirements p {
+            margin: 0.25rem 0;
+        }
+        
+        .textarea-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .char-counter {
+            text-align: right;
+            font-size: 12px;
+            color: #a0a0a0;
+            margin-top: 0.25rem;
+        }
+        
+        /* 模型项点击效果 */
+        .model-item {
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .model-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+        }
+        
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .data-table th {
+            color: #ffffff;
+            font-weight: 600;
+            background: rgba(40, 40, 60, 0.5);
+        }
+        
+        .data-table td {
+            color: #a0a0a0;
+        }
+        
+        .data-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .action-btn {
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #a0a0a0;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 0.25rem;
+        }
+        
+        .action-btn:hover {
+            background: #4a9eff;
+            color: #ffffff;
+            border-color: #4a9eff;
+        }
+        
+        .action-btn.danger:hover {
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+        
+        .action-btn.success:hover {
+            background: #28a745;
+            border-color: #28a745;
+        }
+        
+        /* 上传表单模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: rgba(30, 30, 50, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin: 5% auto;
+            padding: 2rem;
+            width: 80%;
+            max-width: 600px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .modal-title {
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .close {
+            color: #a0a0a0;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .close:hover {
+            color: #ffffff;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .form-label.required::after {
+            content: ' *';
+            color: #dc3545;
+        }
+        
+        .form-control {
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 100%;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #4a9eff;
+            box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.2);
+        }
+        
+        .form-control::placeholder {
+            color: #a0a0a0;
+        }
+        
+        .file-upload {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+        
+        .file-upload:hover {
+            border-color: #4a9eff;
+        }
+        
+        .file-upload-icon {
+            font-size: 3rem;
+            color: #a0a0a0;
+            margin-bottom: 1rem;
+        }
+        
+        .file-upload-text {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: #ffffff;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-primary {
+            background: #4a9eff;
+            color: #ffffff;
+        }
+        
+        .btn-primary:hover {
+            background: #357abd;
+        }
+        
+        /* 分页 */
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .pagination-info {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+        
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .page-btn {
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #a0a0a0;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .page-btn:hover,
+        .page-btn.active {
+            background: #4a9eff;
+            color: #ffffff;
+            border-color: #4a9eff;
+        }
+        
+        .page-input {
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 80px;
+            text-align: center;
+        }
+        
+        .page-size-select {
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        /* 标签管理样式 */
+        .tag-management-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .tag-section {
+            background: rgba(30, 30, 50, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(5px);
+        }
+        
+        .tag-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .tag-section-title {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .new-tag-btn {
+            background: #4a9eff;
+            border: none;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .new-tag-btn:hover {
+            background: #357abd;
+        }
+        
+        /* 地理位置标签样式 */
+        .location-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        
+        .location-tag {
+            background: #dc3545;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .location-tag:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+        
+        .location-tag .delete-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        
+        .location-tag .delete-btn:hover {
+            opacity: 1;
+        }
+        
+        /* 项目归属标签样式 */
+        .project-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        
+        .project-tag {
+            background: #28a745;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .project-tag:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+        
+        .project-tag .delete-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        
+        .project-tag .delete-btn:hover {
+            opacity: 1;
+        }
+        
+        /* 添加标签表单 */
+        .add-tag-form {
+            background: rgba(40, 40, 60, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .add-tag-form.show {
+            display: block;
+        }
+        
+        /* 模态框基础样式 */
+        #uploadModal {
+            display: none !important;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+        
+        #uploadModal.show {
+            display: block !important;
+        }
+        
+        .modal-content {
+            background: rgba(30, 30, 50, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin: 5% auto;
+            padding: 0;
+            width: 80%;
+            max-width: 1000px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-title {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .close {
+            color: #a0a0a0;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .close:hover {
+            color: #ffffff;
+        }
+        
+        /* 上传模态框样式 */
+        .upload-modal-content {
+            width: 90%;
+            max-width: 1200px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .upload-form-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            padding: 1.5rem;
+        }
+        
+        .upload-form-left,
+        .upload-form-right {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .form-section {
+            background: rgba(40, 40, 60, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        
+        .section-title {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .cascade-selects {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .cascade-select {
+            flex: 1;
+        }
+        
+        .upload-section {
+            background: rgba(40, 40, 60, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(30, 30, 50, 0.5);
+            margin-bottom: 1rem;
+        }
+        
+        .file-upload-area:hover {
+            border-color: #4a9eff;
+            background: rgba(74, 158, 255, 0.1);
+        }
+        
+        .upload-icon {
+            font-size: 2rem;
+            color: #a0a0a0;
+            margin-bottom: 1rem;
+        }
+        
+        .upload-text {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+        
+        .file-requirements {
+            background: rgba(30, 30, 50, 0.5);
+            border-radius: 6px;
+            padding: 1rem;
+        }
+        
+        .requirement-title {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .requirement-item {
+            color: #a0a0a0;
+            font-size: 12px;
+            margin-bottom: 0.25rem;
+            line-height: 1.4;
+        }
+        
+        .textarea-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .char-counter {
+            color: #a0a0a0;
+            font-size: 12px;
+            text-align: right;
+            margin-top: 0.25rem;
+        }
+        
+        /* 编辑模态框样式 */
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-title {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .modal-body {
+            padding: 2rem;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            padding: 1.5rem 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .filter-section {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .filter-row {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .search-input {
+                width: 100%;
+            }
+            
+            .models-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 1rem;
+            }
+            
+            .tag-management-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .upload-form-container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .cascade-selects {
+                flex-direction: column;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="top-navbar">
+        <a href="{% url 'accounts:dashboard' %}" class="navbar-brand">
+            <i class="fas fa-cube me-2"></i>
+            三维数据资产管理系统
+        </a>
+        
+        <div class="navbar-right">
+            <a href="#" class="navbar-link"></a>
+            <i class="fas fa-bell notification-icon"></i>
+            <div class="user-dropdown">
+                <div class="user-info" onclick="toggleDropdown()">
+                    <div class="user-avatar">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <span>超级管理员</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="dropdown-menu" id="userDropdown">
+                    <a href="{% url 'accounts:person' %}" class="dropdown-item">
+                        <i class="fas fa-user me-2"></i>
+                        个人中心
+                    </a>
+                    <a href="{% url 'accounts:logout' %}" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt me-2"></i>
+                        退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 左侧边栏 -->
+    <aside class="sidebar">
+        <a href="{% url 'accounts:dashboard' %}" class="sidebar-item">
+            <i class="fas fa-chart-bar"></i>
+            数据统计
+        </a>
+        <a href="{% url 'accounts:my_data' %}" class="sidebar-item">
+            <i class="fas fa-folder"></i>
+            我的数据
+        </a>
+        <a href="{% url 'accounts:data_management' %}" class="sidebar-item active">
+            <i class="fas fa-list"></i>
+            数据管理
+        </a>
+        <a href="{% url 'accounts:system_settings' %}" class="sidebar-item">
+            <i class="fas fa-cog"></i>
+            系统设置
+        </a>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+
+        <!-- 标签页导航 -->
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" onclick="showDataManagement()">数据管理</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showTagManagement()">标签管理</a>
+            </li>
+        </ul>
+
+        <!-- 数据管理内容 -->
+        <div id="dataManagementContent">
+            <!-- 筛选工具栏 -->
+            <div class="toolbar">
+                <div class="filter-section">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label class="filter-label">来源</label>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="source" id="sourceInternal" value="internal" {% if not current_source or current_source == 'internal' %}checked{% endif %}>
+                                    <span>内部</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="source" id="sourceExternal" value="external" {% if current_source == 'external' %}checked{% endif %}>
+                                    <span>外部</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">项目归属</label>
+                            <select class="filter-select" id="projectTagSelect">
+                                <option value="">请选择</option>
+                                {% for tag in project_tags %}
+                                    <option value="{{ tag.id }}" {% if current_project_tag == tag.id|stringformat:"s" %}selected{% endif %}>{{ tag.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">模型名称</label>
+                            <input type="text" class="search-input" id="modelNameInput" placeholder="请输入模型名称检索" value="{{ current_model_name }}">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label class="filter-label">创建时间</label>
+                            <div class="date-range">
+                                <input type="date" class="date-input" id="startDateInput" placeholder="开始日期" value="{{ current_start_date }}">
+                                <span class="date-separator">至</span>
+                                <input type="date" class="date-input" id="endDateInput" placeholder="结束日期" value="{{ current_end_date }}">
+                            </div>
+                        </div>
+                        
+                        <div class="filter-actions">
+                            <button class="btn btn-secondary" onclick="resetFilters()">取消</button>
+                            <button class="btn btn-primary" onclick="performSearch()">查询</button>
+                        </div>
+                    </div>
+                    
+                    <div class="upload-section">
+                        <button class="upload-btn" onclick="openUploadModal()">
+                            <i class="fas fa-upload"></i>
+                            普通上传
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 批量操作栏 -->
+            <div class="batch-actions" id="batchActions">
+                <div class="batch-buttons">
+                    <button class="btn btn-outline-primary" onclick="enableBatchDownload()">
+                        <i class="fas fa-download"></i>
+                        批量下载
+                    </button>
+                    <button class="btn btn-outline-danger" onclick="enableBatchDelete()">
+                        <i class="fas fa-trash"></i>
+                        批量删除
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 批量确认栏 -->
+            <div class="batch-confirm" id="batchConfirm" style="display: none;">
+                <div class="batch-info">
+                    <span class="batch-count">确认导出共 <span id="selectedCount">0</span> 个</span>
+                </div>
+                <div class="batch-buttons">
+                    <button class="btn btn-primary" onclick="confirmBatchAction()">
+                        <i class="fas fa-check"></i>
+                        确认导出
+                    </button>
+                    <button class="btn btn-secondary" onclick="cancelBatchAction()">
+                        <i class="fas fa-times"></i>
+                        取消导出
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 模型网格 -->
+            <div class="models-grid" id="modelsGrid">
+                {% for model in models %}
+                <div class="model-item" data-model-id="{{ model.id }}">
+                    <div class="model-selector" style="display: none;">
+                        <input type="checkbox" class="model-checkbox" data-model-id="{{ model.id }}" onchange="toggleSelection({{ model.id|safe }})">
+                    </div>
+                    <div class="model-thumbnail" onclick="openPreviewModal({{ model.id|safe }})">
+                        {% if model.media_files %}
+                            {% for media_file in model.media_files %}
+                                {% if media_file.name|slice:"-4:" == ".jpg" or media_file.name|slice:"-4:" == ".png" or media_file.name|slice:"-5:" == ".jpeg" %}
+                                    <img src="/media/{{ media_file.path }}" alt="{{ model.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <div class="placeholder-thumbnail">
+                                <i class="fas fa-cube"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="model-info" onclick="openPreviewModal({{ model.id|safe }})">
+                        <h4 class="model-title">{{ model.name }}</h4>
+                        {% if model.description %}
+                            <p class="model-subtitle">{{ model.description|truncatechars:20 }}</p>
+                        {% endif %}
+                        <div class="model-meta">
+                            <span class="model-source">{{ model.get_source_display }}</span>
+                            <span class="model-level">{{ model.get_model_level_display }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="no-data">
+                    <i class="fas fa-inbox"></i>
+                    <p>暂无数据</p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- 分页 -->
+            <div class="pagination">
+                <div class="pagination-info">页共计{{ models.paginator.count }}条</div>
+                <div class="pagination-controls">
+                    {% if models.has_previous %}
+                        <button class="page-btn" onclick="window.location.href='?page={{ models.previous_page_number }}'">&lt;</button>
+                    {% endif %}
+                    
+                    {% for num in models.paginator.page_range %}
+                        {% if num == models.number %}
+                            <button class="page-btn active">{{ num }}</button>
+                        {% elif num <= 5 or num > models.paginator.num_pages|add:"-5" or num|add:"-5" <= models.number and models.number <= num|add:"5" %}
+                            <button class="page-btn" onclick="window.location.href='?page={{ num }}'">{{ num }}</button>
+                        {% elif num == 6 and models.number > 8 %}
+                            <span style="color: #a0a0a0; margin: 0 0.5rem;">...</span>
+                        {% elif num == models.paginator.num_pages|add:"-5" and models.number < models.paginator.num_pages|add:"-7" %}
+                            <span style="color: #a0a0a0; margin: 0 0.5rem;">...</span>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if models.has_next %}
+                        <button class="page-btn" onclick="window.location.href='?page={{ models.next_page_number }}'">&gt;</button>
+                    {% endif %}
+                    
+                    <select class="page-size-select">
+                        <option value="10">10条/页</option>
+                        <option value="20" selected>20条/页</option>
+                        <option value="50">50条/页</option>
+                    </select>
+                    <span style="color: #a0a0a0; margin: 0 0.5rem;">跳至</span>
+                    <input type="number" class="page-input" value="{{ models.number }}" min="1" max="{{ models.paginator.num_pages }}">
+                    <span style="color: #a0a0a0; margin-left: 0.5rem;">页</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 标签管理内容 -->
+        <div id="tagManagementContent" style="display: none;">
+            <!-- 标签管理容器 -->
+            <div class="tag-management-container">
+                <!-- 地理位置标签 -->
+                <div class="tag-section">
+                    <div class="tag-section-header">
+                        <h3 class="tag-section-title">地理位置</h3>
+                        <button class="new-tag-btn" onclick="showAddLocationForm()">
+                            <i class="fas fa-plus"></i>
+                            新建
+                        </button>
+                    </div>
+                    
+                    <!-- 添加地理位置表单 -->
+                    <div class="add-tag-form" id="addLocationForm">
+                        <div class="form-group">
+                            <label class="form-label">地理位置名称</label>
+                            <input type="text" class="form-control" id="locationInput" placeholder="请输入地理位置名称">
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-secondary" onclick="hideAddLocationForm()">取消</button>
+                            <button class="btn btn-primary" onclick="addLocationTag()">添加</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 地理位置标签列表 -->
+                    <div class="location-tags" id="locationTags">
+                        {% for location_tag in location_tags %}
+                        <div class="location-tag" data-tag-id="{{ location_tag.id }}">
+                            {{ location_tag.name }}
+                            <button class="delete-btn" onclick="deleteLocationTag(this)">×</button>
+                        </div>
+                        {% empty %}
+                        <div class="no-tags">暂无地理位置标签</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- 项目归属标签 -->
+                <div class="tag-section">
+                    <div class="tag-section-header">
+                        <h3 class="tag-section-title">项目归属</h3>
+                        <button class="new-tag-btn" onclick="showAddProjectForm()">
+                            <i class="fas fa-plus"></i>
+                            新建
+                        </button>
+                    </div>
+                    
+                    <!-- 添加项目归属表单 -->
+                    <div class="add-tag-form" id="addProjectForm">
+                        <div class="form-group">
+                            <label class="form-label">项目归属名称</label>
+                            <input type="text" class="form-control" id="projectInput" placeholder="测试输入项目归属标签">
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-secondary" onclick="hideAddProjectForm()">取消</button>
+                            <button class="btn btn-primary" onclick="addProjectTag()">添加</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 项目归属标签列表 -->
+                    <div class="project-tags" id="projectTags">
+                        {% for project_tag in project_tags %}
+                        <div class="project-tag" data-tag-id="{{ project_tag.id }}">
+                            {{ project_tag.name }}
+                            <button class="delete-btn" onclick="deleteProjectTag(this)">×</button>
+                        </div>
+                        {% empty %}
+                        <div class="no-tags">暂无项目归属标签</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 上传数据模态框 -->
+    <div id="uploadModal" class="modal">
+        <div class="modal-content upload-modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">上传图片/视频</h3>
+                <span class="close" onclick="closeUploadModal()">&times;</span>
+            </div>
+            
+            <form id="uploadForm" enctype="multipart/form-data">
+            <div class="upload-form-container">
+                <!-- 左侧表单区域 -->
+                <div class="upload-form-left">
+                    <!-- 基础信息 -->
+                    <div class="form-section">
+                        <h4 class="section-title">基础信息</h4>
+                        
+                        <div class="form-group">
+                            <label class="form-label">模型名称:</label>
+                            <input type="text" name="modelName" class="form-control" placeholder="请输入模型名称" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">来源:</label>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="upload_source" value="internal" checked>
+                                    <span>内部</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="upload_source" value="external">
+                                    <span>外部</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">项目归属:</label>
+                            <select name="projectTag" class="form-control" required>
+                                <option value="">请选择</option>
+                                {% for tag in project_tags %}
+                                <option value="{{ tag.id }}">{{ tag.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">地理位置:</label>
+                            <select name="locationTag" class="form-control" required>
+                                <option value="">请选择</option>
+                                {% for tag in location_tags %}
+                                <option value="{{ tag.id }}">{{ tag.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        
+                        <div class="form-group">
+                            <label class="form-label">是否有使用侵权风险:</label>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="infringement_risk" value="no" checked>
+                                    <span>不侵权</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="infringement_risk" value="yes">
+                                    <span>侵权</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">模型等级:</label>
+                            <div class="radio-group">
+                                <label class="radio-item">
+                                    <input type="radio" name="model_level" value="confidential" checked>
+                                    <span>保密</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="model_level" value="important">
+                                    <span>重要</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="model_level" value="normal">
+                                    <span>普通</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 右侧上传区域 -->
+                <div class="upload-form-right">
+                    <!-- 上传图片或视频 -->
+                    <div class="upload-section">
+                        <h4 class="section-title">上传图片或视频</h4>
+                        <div class="file-upload-area" onclick="document.getElementById('mediaFileInput').click()">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <div class="upload-text">点击或将文件拖拽到此处</div>
+                            <input type="file" id="mediaFileInput" name="mediaFiles" style="display: none;" accept=".png,.jpg,.jpeg,.bmp,.tga,.mp4,.webm" multiple>
+                        </div>
+                        <div class="file-requirements">
+                            <div class="requirement-title">注: 图片和视频要求提示</div>
+                            <div class="requirement-item">1、仅支持上传不超5G的图片或视频</div>
+                            <div class="requirement-item">2、图片格式支持PNG、JPG、BMP、TGA格式</div>
+                            <div class="requirement-item">3、场景数据或矢量数据需要上传预览视频</div>
+                            <div class="requirement-item">4、视频格式仅支持mp4、webm格式</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 简介或建议 -->
+                    <div class="form-section">
+                        <h4 class="section-title">简介或建议</h4>
+                        <div class="form-group">
+                            <textarea name="description" class="form-control textarea-control" placeholder="请输入简介或建议" maxlength="255"></textarea>
+                            <div class="char-counter">0/255</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </form>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeUploadModal()">取消</button>
+                <button type="button" class="btn btn-primary" onclick="submitUpload()">上传图片/视频</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 预览模态框 -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content preview-modal-content">
+            <!-- 预览区域 -->
+            <div class="preview-section">
+                <div class="single-preview-container">
+                    <div class="preview-media-container" id="previewMediaContainer">
+                        <div class="no-preview">
+                            <i class="fas fa-cube"></i>
+                            <span>暂无预览</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 标题和操作按钮 -->
+            <div class="preview-header">
+                <div class="preview-title-section">
+                    <h3 class="preview-title" id="previewModelName">最新的数据</h3>
+                    <i class="fas fa-edit edit-icon" onclick="openEditModal()" title="编辑"></i>
+                </div>
+                
+                <div class="preview-buttons">
+                    <button class="btn btn-danger" onclick="deleteModel()">删除</button>
+                    <button class="btn btn-primary" onclick="downloadModel()">下载</button>
+                </div>
+            </div>
+            
+            <!-- 详细信息区域 -->
+            <div class="preview-details">
+                <div class="info-section">
+                    <h5 class="section-title">基础信息:</h5>
+                    <div class="info-grid-row">
+                        <div class="info-item">
+                            <span class="info-label">文件格式:</span>
+                            <span class="info-value" id="previewFileFormat">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">来源:</span>
+                            <span class="info-value" id="previewSource">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">地理位置:</span>
+                            <span class="info-value" id="previewLocation">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">项目归属:</span>
+                            <span class="info-value" id="previewProject">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">是否有使用侵权风险:</span>
+                            <span class="info-value" id="previewInfringement">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">创建人:</span>
+                            <span class="info-value" id="previewCreator">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">模型等级:</span>
+                            <span class="info-value" id="previewLevel">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">创建时间:</span>
+                            <span class="info-value" id="previewCreateTime">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 简介或使用建议 -->
+            <div class="preview-description">
+                <label class="description-label">简介或使用建议:</label>
+                <div class="description-content" id="previewDescription">暂无描述</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 编辑模态框 -->
+    <div id="editModal" class="modal">
+        <div class="modal-content edit-modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">编辑数据模型</h3>
+                <span class="close" onclick="closeEditModal()">&times;</span>
+            </div>
+            
+            <form id="editForm" class="modal-body">
+                <div class="edit-form-container">
+                    <!-- 左侧表单区域 -->
+                    <div class="form-left">
+                        <!-- 基础信息 -->
+                        <div class="form-section">
+                            <h4 class="form-section-title">基础信息</h4>
+                            
+                            <div class="form-group">
+                                <label class="form-label required">模型名称:</label>
+                                <input type="text" name="name" id="editModelName" class="form-control" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label required">来源:</label>
+                                <div class="radio-group">
+                                    <label class="radio-item">
+                                        <input type="radio" name="source" value="internal" id="editSourceInternal">
+                                        <span>内部</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="source" value="external" id="editSourceExternal">
+                                        <span>外部</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+{#                            <div class="form-group">#}
+{#                                <label class="form-label">生成方式:</label>#}
+{#                                <div class="radio-group">#}
+{#                                    <label class="radio-item">#}
+{#                                        <input type="radio" name="generation_method" value="refined" id="editGenerationRefined">#}
+{#                                        <span>精修模型</span>#}
+{#                                    </label>#}
+{#                                    <label class="radio-item">#}
+{#                                        <input type="radio" name="generation_method" value="auto" id="editGenerationAuto" checked>#}
+{#                                        <span>自动生成</span>#}
+{#                                    </label>#}
+{#                                </div>#}
+{#                            </div>#}
+                            
+{#                            <div class="form-group">#}
+{#                                <label class="form-label required">应用端:</label>#}
+{#                                <div class="radio-group">#}
+{#                                    <label class="radio-item">#}
+{#                                        <input type="radio" name="application_client" value="mobile" id="editClientMobile">#}
+{#                                        <span>移动端</span>#}
+{#                                    </label>#}
+{#                                    <label class="radio-item">#}
+{#                                        <input type="radio" name="application_client" value="pc" id="editClientPc" checked>#}
+{#                                        <span>PC端</span>#}
+{#                                    </label>#}
+{#                                </div>#}
+{#                            </div>#}
+                            
+                            <div class="form-group">
+                                <label class="form-label required">项目归属:</label>
+                                <select name="project_tag" id="editProjectTag" class="form-control">
+                                    <option value="">请选择</option>
+                                    {% for tag in project_tags %}
+                                        <option value="{{ tag.id }}">{{ tag.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label required">地理位置:</label>
+                                <select name="location_tag" id="editLocationTag" class="form-control">
+                                    <option value="">请选择</option>
+                                    {% for tag in location_tags %}
+                                        <option value="{{ tag.id }}">{{ tag.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            
+{#                            <div class="form-group">#}
+{#                                <label class="form-label required">模型分类:</label>#}
+{#                                <div class="cascade-selects">#}
+{#                                    <select name="model_category_1" id="editModelCategory1" class="form-control">#}
+{#                                        <option value="">请选择</option>#}
+{#                                    </select>#}
+{#                                    <select name="model_category_2" id="editModelCategory2" class="form-control">#}
+{#                                        <option value="">请选择</option>#}
+{#                                    </select>#}
+{#                                    <input type="text" name="model_category_3" id="editModelCategory3" class="form-control" placeholder="自定义分类">#}
+{#                                </div>#}
+{#                            </div>#}
+                            
+                            <div class="form-group">
+                                <label class="form-label required">是否有使用侵权风险:</label>
+                                <div class="radio-group">
+                                    <label class="radio-item">
+                                        <input type="radio" name="infringement_risk" value="no" id="editInfringementNo" checked>
+                                        <span>不侵权</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="infringement_risk" value="yes" id="editInfringementYes">
+                                        <span>侵权</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label required">模型等级:</label>
+                                <div class="radio-group">
+                                    <label class="radio-item">
+                                        <input type="radio" name="model_level" value="confidential" id="editLevelConfidential">
+                                        <span>保密</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="model_level" value="important" id="editLevelImportant">
+                                        <span>重要</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="model_level" value="normal" id="editLevelNormal" checked>
+                                        <span>普通</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+{#                        <!-- 参数信息 -->#}
+{#                        <div class="form-section">#}
+{#                            <h4 class="form-section-title">参数信息</h4>#}
+{#                            #}
+{#                            <div class="form-group">#}
+{#                                <label class="form-label">面数:</label>#}
+{#                                <input type="text" name="face_count" id="editFaceCount" class="form-control" placeholder="请输入面数">#}
+{#                            </div>#}
+{#                            #}
+{#                            <div class="form-group">#}
+{#                                <label class="form-label">贴图数:</label>#}
+{#                                <input type="text" name="texture_count" id="editTextureCount" class="form-control" placeholder="请输入贴图数">#}
+{#                            </div>#}
+{#                            #}
+{#                            <div class="form-group">#}
+{#                                <label class="form-label">分辨率:</label>#}
+{#                                <input type="text" name="resolution" id="editResolution" class="form-control" placeholder="请输入分辨率">#}
+{#                            </div>#}
+{#                            #}
+{#                            <div class="form-group">#}
+{#                                <label class="form-label">类型:</label>#}
+{#                                <div class="radio-group">#}
+{#                                    <label class="radio-item">#}
+{#                                        <input type="radio" name="model_type" value="component" id="editTypeComponent" checked>#}
+{#                                        <span>组件</span>#}
+{#                                    </label>#}
+{#                                    <label class="radio-item">#}
+{#                                        <input type="radio" name="model_type" value="non-component" id="editTypeNonComponent">#}
+{#                                        <span>非组件</span>#}
+{#                                    </label>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                            #}
+{#                            <div class="form-group">#}
+{#                                <label class="form-label">贴图类型(多选):</label>#}
+{#                                <select name="texture_type" id="editTextureType" class="form-control" multiple>#}
+{#                                    <option value="">请选择</option>#}
+{#                                </select>#}
+{#                            </div>#}
+{#                        </div>#}
+                    </div>
+                    
+                    <!-- 右侧上传区域 -->
+                    <div class="form-right">
+{#                        <div class="form-group">#}
+{#                            <label class="form-label required">是否为灵境引擎:</label>#}
+{#                            <div class="radio-group">#}
+{#                                <label class="radio-item">#}
+{#                                    <input type="radio" name="is_lingjing" value="yes" id="editLingjingYes" checked>#}
+{#                                    <span>是</span>#}
+{#                                </label>#}
+{#                                <label class="radio-item">#}
+{#                                    <input type="radio" name="is_lingjing" value="no" id="editLingjingNo">#}
+{#                                    <span>否</span>#}
+{#                                </label>#}
+{#                            </div>#}
+{#                        </div>#}
+{#                        #}
+{#                        <div class="form-group">#}
+{#                            <label class="form-label required">上传模型:</label>#}
+{#                            <div class="file-upload-area" id="modelUploadArea">#}
+{#                                <div class="file-upload-content">#}
+{#                                    <i class="fas fa-cloud-upload-alt file-upload-icon"></i>#}
+{#                                    <p class="file-upload-text">点击或将文件拖拽到此处</p>#}
+{#                                </div>#}
+{#                                <input type="file" id="modelFileInput" name="model_file" accept=".fbx,.zip" style="display: none;">#}
+{#                            </div>#}
+{#                            <div class="file-requirements">#}
+{#                                <p><strong>注:文件要求提示</strong></p>#}
+{#                                <p>1、仅支持上传不超5G的文件</p>#}
+{#                                <p>2、模型文件支持FBX、ZIP格式</p>#}
+{#                            </div>#}
+{#                        </div>#}
+                        
+                        <div class="form-group">
+                            <label class="form-label required">上传图片或视频:</label>
+                            <div class="file-upload-area" id="mediaUploadArea">
+                                <div class="file-upload-content">
+                                    <div class="preview-image" id="previewImage">
+                                        <i class="fas fa-image"></i>
+                                        <span>点击上传</span>
+                                    </div>
+                                </div>
+                                <input type="file" id="mediaFileInput" name="media_file" accept="image/*,video/*" style="display: none;">
+                                <button type="button" class="remove-media-btn" id="removeMediaBtn" style="display: none;">×</button>
+                            </div>
+                            <div class="file-requirements">
+                                <p><strong>注:图片和视频要求提示</strong></p>
+                                <p>1、仅支持上传不超5G的图片或视频</p>
+                                <p>2、图片格式支持PNG、JPG、BMP、TGA格式</p>
+                                <p>3、场景数据或矢量数据需要上传预览视频</p>
+                                <p>4、视频格式仅支持mp4、webm格式</p>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">简介或建议:</label>
+                            <textarea name="description" id="editDescription" class="form-control textarea-control" placeholder="请输入简介或建议" maxlength="255"></textarea>
+                            <div class="char-counter">0/255</div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeEditModal()">取消</button>
+                <button type="button" class="btn btn-primary" onclick="saveEdit()">确定</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 用户下拉菜单
+        function toggleDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+        
+        // 点击外部关闭下拉菜单
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const userInfo = document.querySelector('.user-info');
+            if (!userInfo.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+        
+        // 打开上传模态框
+        function openUploadModal() {
+            document.getElementById('uploadModal').style.display = 'block';
+        }
+        
+        // 关闭上传模态框
+        function closeUploadModal() {
+            document.getElementById('uploadModal').style.display = 'none';
+            document.getElementById('uploadForm').reset();
+        }
+        
+        // 当前预览的模型ID
+        let currentModelId = null;
+        
+        // 打开预览模态框
+        function openPreviewModal(modelId) {
+            console.log('openPreviewModal called with modelId:', modelId);
+            currentModelId = modelId;
+            
+            // 先显示模态框
+            const modal = document.getElementById('previewModal');
+            if (modal) {
+                modal.classList.add('show');
+                console.log('Modal displayed');
+            } else {
+                console.error('Modal element not found');
+                return;
+            }
+            
+            // 获取模型数据
+            fetch(`/api/data-models/${modelId}/`)
+                .then(response => {
+                    console.log('API response:', response);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('API data:', data);
+                    if (data.success) {
+                        populatePreviewModal(data.model);
+                    } else {
+                        alert('获取模型数据失败: ' + (data.message || '未知错误'));
+                    }
+                })
+                .catch(error => {
+                    console.error('API Error:', error);
+                    alert('获取模型数据失败: ' + error.message);
+                });
+        }
+        
+        // 填充预览模态框数据
+        function populatePreviewModal(model) {
+            try {
+                // 设置标题
+                const previewModelName = document.getElementById('previewModelName');
+                if (previewModelName) previewModelName.textContent = model.name || '最新的数据';
+                
+                // 基础信息 - 按行排列，添加文件格式字段
+                const previewFileFormat = document.getElementById('previewFileFormat');
+                if (previewFileFormat) previewFileFormat.textContent = getFileFormat(model.media_files) || '-';
+                
+                const previewSource = document.getElementById('previewSource');
+                if (previewSource) previewSource.textContent = model.source === 'internal' ? '内部' : '外部';
+                
+                const previewLocation = document.getElementById('previewLocation');
+                if (previewLocation) previewLocation.textContent = model.location_tag ? model.location_tag.name : '-';
+                
+                const previewProject = document.getElementById('previewProject');
+                if (previewProject) previewProject.textContent = model.project_tag ? model.project_tag.name : '-';
+                
+                const previewInfringement = document.getElementById('previewInfringement');
+                if (previewInfringement) previewInfringement.textContent = model.infringement_risk === 'no' ? '不侵权' : '侵权';
+                
+                const previewCreator = document.getElementById('previewCreator');
+                if (previewCreator) previewCreator.textContent = model.created_by ? model.created_by.username : '-';
+                
+                const previewLevel = document.getElementById('previewLevel');
+                if (previewLevel) previewLevel.textContent = getModelLevelText(model.model_level);
+                
+                const previewCreateTime = document.getElementById('previewCreateTime');
+                if (previewCreateTime) previewCreateTime.textContent = formatDateTime(model.created_at);
+                
+                const previewDescription = document.getElementById('previewDescription');
+                if (previewDescription) {
+                    previewDescription.textContent = model.description || '暂无描述';
+                }
+            
+                // 设置媒体预览
+                const previewMediaContainer = document.getElementById('previewMediaContainer');
+                const mediaSource = getMediaSource(model.media_files);
+                if (mediaSource) {
+                    if (mediaSource.type === 'video') {
+                        previewMediaContainer.innerHTML = `
+                            <video controls style="width: 100%; height: 100%; object-fit: cover;">
+                                <source src="${mediaSource.url}" type="video/mp4">
+                                <source src="${mediaSource.url}" type="video/webm">
+                                您的浏览器不支持视频播放
+                            </video>
+                        `;
+                    } else {
+                        previewMediaContainer.innerHTML = `<img src="${mediaSource.url}" alt="${model.name}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                    }
+                } else {
+                    previewMediaContainer.innerHTML = `
+                        <div class="no-preview">
+                            <i class="fas fa-cube"></i>
+                            <span>暂无预览</span>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error populating preview modal:', error);
+                alert('填充预览数据时出错: ' + error.message);
+            }
+        }
+        
+        // 关闭预览模态框
+        function closePreviewModal() {
+            const modal = document.getElementById('previewModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+            currentModelId = null;
+            
+            // 停止视频播放
+            const video = document.getElementById('previewVideo');
+            if (video) {
+                video.pause();
+                video.currentTime = 0;
+            }
+        }
+        
+        // 切换全屏
+        function toggleFullscreen() {
+            const video = document.getElementById('previewVideo');
+            if (video.requestFullscreen) {
+                video.requestFullscreen();
+            } else if (video.webkitRequestFullscreen) {
+                video.webkitRequestFullscreen();
+            } else if (video.msRequestFullscreen) {
+                video.msRequestFullscreen();
+            }
+        }
+        
+        // 删除模型
+        function deleteModel() {
+            if (!currentModelId) return;
+            
+            if (confirm('确定要删除这个模型吗？此操作不可撤销。')) {
+                fetch(`/api/data-models/${currentModelId}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert('模型删除成功');
+                        closePreviewModal();
+                        location.reload(); // 刷新页面
+                    } else {
+                        alert(result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('删除失败，请重试');
+                });
+            }
+        }
+        
+        // 下载模型
+        function downloadModel() {
+            if (!currentModelId) return;
+            
+            // 获取模型数据
+            fetch(`/api/data-models/${currentModelId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.model.media_files) {
+                        // 下载所有媒体文件
+                        data.model.media_files.forEach(mediaFile => {
+                            const link = document.createElement('a');
+                            link.href = `/${mediaFile.path}`;
+                            link.download = mediaFile.name;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                        });
+                    } else {
+                        alert('没有可下载的文件');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('下载失败，请重试');
+                });
+        }
+        
+        // 辅助函数
+        function getFileFormat(mediaFiles) {
+            if (!mediaFiles || mediaFiles.length === 0) return '-';
+            const firstFile = mediaFiles[0];
+            const extension = firstFile.name.split('.').pop().toLowerCase();
+            return extension;
+        }
+        
+        function getVideoSource(mediaFiles) {
+            if (!mediaFiles) return null;
+            for (let file of mediaFiles) {
+                if (file.name.toLowerCase().endsWith('.mp4') || file.name.toLowerCase().endsWith('.webm')) {
+                    return `/${file.path}`;
+                }
+            }
+            return null;
+        }
+        
+        function getImageSource(mediaFiles) {
+            if (!mediaFiles) return null;
+            for (let file of mediaFiles) {
+                const ext = file.name.toLowerCase();
+                if (ext.endsWith('.png') || ext.endsWith('.jpg') || ext.endsWith('.jpeg') || ext.endsWith('.bmp') || ext.endsWith('.tga')) {
+                    return `/${file.path}`;
+                }
+            }
+            return null;
+        }
+        
+        function getTotalFileSize(mediaFiles) {
+            if (!mediaFiles) return 0;
+            return mediaFiles.reduce((total, file) => total + (file.size || 0), 0);
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        function formatDateTime(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('zh-CN');
+        }
+        
+        function getModelLevelText(level) {
+            const levels = {
+                'confidential': '保密',
+                'important': '重要',
+                'normal': '普通'
+            };
+            return levels[level] || level;
+        }
+        
+        function getMediaSource(mediaFiles) {
+            if (!mediaFiles) return null;
+            
+            for (const file of mediaFiles) {
+                if (file.name) {
+                    const extension = file.name.split('.').pop().toLowerCase();
+                    const url = `/media/${file.path}`;
+                    
+                    // 检查是否为视频文件
+                    if (['mp4', 'webm', 'avi', 'mov', 'wmv'].includes(extension)) {
+                        return { url: url, type: 'video', extension: extension };
+                    }
+                    // 检查是否为图片文件
+                    else if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tga'].includes(extension)) {
+                        return { url: url, type: 'image', extension: extension };
+                    }
+                }
+            }
+            return null;
+        }
+        
+        // 打开上传模态框
+        function openUploadModal() {
+            console.log('openUploadModal called');
+            const modal = document.getElementById('uploadModal');
+            modal.classList.add('show');
+        }
+        
+        // 关闭上传模态框
+        function closeUploadModal() {
+            console.log('closeUploadModal called');
+            const modal = document.getElementById('uploadModal');
+            modal.classList.remove('show');
+            // 重置表单
+            document.querySelector('input[name="modelName"]').value = '';
+            document.querySelector('select[name="projectTag"]').selectedIndex = 0;
+            document.querySelector('select[name="locationTag"]').selectedIndex = 0;
+            document.querySelectorAll('input[name="upload_source"]').forEach(radio => {
+                radio.checked = radio.value === 'internal';
+            });
+            document.querySelectorAll('input[name="infringement_risk"]').forEach(radio => {
+                radio.checked = radio.value === 'no';
+            });
+            document.querySelectorAll('input[name="model_level"]').forEach(radio => {
+                radio.checked = radio.value === 'confidential';
+            });
+            document.getElementById('mediaFileInput').value = '';
+            document.querySelector('textarea[name="description"]').value = '';
+            const fileUploadArea = document.querySelector('.file-upload-area .upload-text');
+            if (fileUploadArea) {
+                fileUploadArea.textContent = '点击或将文件拖拽到此处';
+            }
+        }
+        
+        // 打开编辑模态框
+        function openEditModal() {
+            if (!currentModelId) {
+                alert('请先选择一个模型');
+                return;
+            }
+            
+            // 获取模型数据并填充编辑表单
+            fetch(`/api/models/${currentModelId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        populateEditModal(data.model);
+                        document.getElementById('editModal').classList.add('show');
+                    } else {
+                        alert('获取模型数据失败: ' + (data.message || '未知错误'));
+                    }
+                })
+                .catch(error => {
+                    console.error('API Error:', error);
+                    alert('获取模型数据失败: ' + error.message);
+                });
+        }
+        
+        // 填充编辑模态框数据
+        function populateEditModal(model) {
+            try {
+                // 基本信息 - 模型名称字段已被注释，跳过
+                // document.getElementById('editModelName').value = model.name || '';
+                
+                // 设置单选按钮
+                document.getElementById('editSourceInternal').checked = model.source === 'internal';
+                document.getElementById('editSourceExternal').checked = model.source === 'external';
+                
+                document.getElementById('editInfringementNo').checked = model.infringement_risk === 'no';
+                document.getElementById('editInfringementYes').checked = model.infringement_risk === 'yes';
+                
+                document.getElementById('editLevelConfidential').checked = model.model_level === 'confidential';
+                document.getElementById('editLevelImportant').checked = model.model_level === 'important';
+                document.getElementById('editLevelNormal').checked = model.model_level === 'normal';
+                
+                // 设置下拉选择
+                document.getElementById('editProjectTag').value = model.project_tag ? model.project_tag.id : '';
+                document.getElementById('editLocationTag').value = model.location_tag ? model.location_tag.id : '';
+                
+                // 设置描述
+                document.getElementById('editDescription').value = model.description || '';
+                
+                // 设置字符计数器
+                updateCharCounter();
+                
+                // 设置预览图片
+                const imageSource = getImageSource(model.media_files);
+                const previewImage = document.getElementById('previewImage');
+                if (imageSource) {
+                    previewImage.innerHTML = `<img src="${imageSource}" alt="${model.name}" style="width: 100%; height: 100%; object-fit: cover;">`;
+                    document.getElementById('removeMediaBtn').style.display = 'block';
+                } else {
+                    previewImage.innerHTML = `
+                        <i class="fas fa-image"></i>
+                        <span>点击上传</span>
+                    `;
+                    document.getElementById('removeMediaBtn').style.display = 'none';
+                }
+                
+            } catch (error) {
+                console.error('Error populating edit modal:', error);
+                alert('填充编辑数据时出错: ' + error.message);
+            }
+        }
+        
+        // 关闭编辑模态框
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('show');
+            // 重置表单
+            document.getElementById('editForm').reset();
+            document.getElementById('removeMediaBtn').style.display = 'none';
+        }
+        
+        // 保存编辑
+        function saveEdit() {
+            console.log('DEBUG: saveEdit called, currentModelId:', currentModelId);
+            
+            if (!currentModelId) {
+                alert('错误：没有选择模型');
+                return;
+            }
+            
+            const formData = new FormData(document.getElementById('editForm'));
+            
+            // 调试：检查FormData中的文件
+            console.log('DEBUG: FormData contents:');
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+            
+            // 验证必填字段 - 移除模型名称验证，因为该字段已被注释
+            // const modelName = document.getElementById('editModelName').value.trim();
+            // if (!modelName) {
+            //     alert('请输入模型名称');
+            //     return;
+            // }
+            
+            console.log('DEBUG: Sending request to:', `/api/models/${currentModelId}/update/`);
+            
+            // 发送更新请求
+            fetch(`/api/models/${currentModelId}/update/`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('保存成功');
+                    closeEditModal();
+                    // 刷新页面或更新数据
+                    location.reload();
+                } else {
+                    alert('保存失败: ' + (data.message || '未知错误'));
+                }
+            })
+            .catch(error => {
+                console.error('API Error:', error);
+                alert('保存失败: ' + error.message);
+            });
+        }
+        
+        // 更新字符计数器
+        function updateCharCounter() {
+            const textarea = document.getElementById('editDescription');
+            const counter = document.querySelector('.char-counter');
+            if (textarea && counter) {
+                const length = textarea.value.length;
+                counter.textContent = `${length}/255`;
+            }
+        }
+        
+        // 文件上传处理
+        function setupFileUpload() {
+            // 媒体文件上传
+            const mediaUploadArea = document.getElementById('mediaUploadArea');
+            const mediaFileInput = document.getElementById('mediaFileInput');
+            const removeMediaBtn = document.getElementById('removeMediaBtn');
+            
+            if (mediaUploadArea && mediaFileInput) {
+                mediaUploadArea.addEventListener('click', () => {
+                    mediaFileInput.click();
+                });
+                
+                mediaFileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const previewImage = document.getElementById('previewImage');
+                            if (previewImage) {
+                                previewImage.innerHTML = `<img src="${e.target.result}" alt="预览" style="width: 100%; height: 100%; object-fit: cover;">`;
+                                if (removeMediaBtn) {
+                                    removeMediaBtn.style.display = 'block';
+                                }
+                            }
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+                
+                if (removeMediaBtn) {
+                    removeMediaBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        mediaFileInput.value = '';
+                        const previewImage = document.getElementById('previewImage');
+                        if (previewImage) {
+                            previewImage.innerHTML = `
+                                <i class="fas fa-image"></i>
+                                <span>点击上传</span>
+                            `;
+                        }
+                        removeMediaBtn.style.display = 'none';
+                    });
+                }
+            }
+        }
+        
+        // 获取CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const uploadModal = document.getElementById('uploadModal');
+            const previewModal = document.getElementById('previewModal');
+            const editModal = document.getElementById('editModal');
+            
+            if (event.target === uploadModal) {
+                closeUploadModal();
+            }
+            if (event.target === previewModal) {
+                closePreviewModal();
+            }
+            if (event.target === editModal) {
+                closeEditModal();
+            }
+        }
+        
+        // 提交上传
+        function submitUpload() {
+            // 验证必填字段
+            const modelName = document.querySelector('input[name="modelName"]').value.trim();
+            const projectOwnership = document.querySelector('select[name="projectTag"]').value;
+            const geographicalLocation = document.querySelector('select[name="locationTag"]').value;
+            const mediaFiles = document.getElementById('mediaFileInput').files;
+            
+            if (!modelName) {
+                alert('请输入模型名称');
+                return;
+            }
+            
+            if (!projectOwnership) {
+                alert('请选择项目归属');
+                return;
+            }
+            
+            if (!geographicalLocation) {
+                alert('请选择地理位置');
+                return;
+            }
+            
+            if (mediaFiles.length === 0) {
+                alert('请选择要上传的图片或视频文件');
+                return;
+            }
+            
+            // 验证文件大小（5GB限制）
+            const maxSize = 5 * 1024 * 1024 * 1024; // 5GB in bytes
+            
+            // 验证媒体文件格式
+            const allowedImageExtensions = ['.png', '.jpg', '.jpeg', '.bmp', '.tga'];
+            const allowedVideoExtensions = ['.mp4', '.webm'];
+            
+            for (let file of mediaFiles) {
+                const fileName = file.name.toLowerCase();
+                const isValidImage = allowedImageExtensions.some(ext => fileName.endsWith(ext));
+                const isValidVideo = allowedVideoExtensions.some(ext => fileName.endsWith(ext));
+                
+                if (!isValidImage && !isValidVideo) {
+                    alert(`文件 ${file.name} 格式不支持，图片支持PNG、JPG、BMP、TGA格式，视频支持MP4、WEBM格式`);
+                    return;
+                }
+                
+                if (file.size > maxSize) {
+                    alert(`文件 ${file.name} 大小不能超过5GB`);
+                    return;
+                }
+            }
+            
+            // 创建FormData对象
+            const formData = new FormData();
+            formData.append('name', modelName);
+            formData.append('source', document.querySelector('input[name="upload_source"]:checked').value);
+            formData.append('project_tag', projectOwnership);
+            formData.append('location_tag', geographicalLocation);
+            formData.append('infringement_risk', document.querySelector('input[name="infringement_risk"]:checked').value);
+            formData.append('model_level', document.querySelector('input[name="model_level"]:checked').value);
+            formData.append('description', document.querySelector('textarea[name="description"]').value);
+            
+            // 添加媒体文件
+            for (let file of mediaFiles) {
+                formData.append('media_files', file);
+            }
+            
+            // 显示上传进度
+            const submitBtn = document.querySelector('#uploadModal .btn-primary');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '上传中...';
+            submitBtn.disabled = true;
+            
+            // 发送上传请求
+            fetch('/api/data-models/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert(result.message);
+                    closeUploadModal();
+                    location.reload(); // 刷新页面显示新数据
+                } else {
+                    alert(result.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('上传失败，请重试');
+            })
+            .finally(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
+        }
+        
+        // 字符计数器
+        document.addEventListener('DOMContentLoaded', function() {
+            const textarea = document.querySelector('.textarea-control');
+            const counter = document.querySelector('.char-counter');
+            
+            if (textarea && counter) {
+                textarea.addEventListener('input', function() {
+                    const length = this.value.length;
+                    counter.textContent = `${length}/255`;
+                    
+                    if (length > 255) {
+                        counter.style.color = '#dc3545';
+                    } else {
+                        counter.style.color = '#a0a0a0';
+                    }
+                });
+            }
+        });
+        
+        // 文件拖拽上传
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadAreas = document.querySelectorAll('.file-upload-area');
+            
+            uploadAreas.forEach(area => {
+                area.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.style.borderColor = '#4a9eff';
+                    this.style.background = 'rgba(74, 158, 255, 0.1)';
+                });
+                
+                area.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    this.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                    this.style.background = 'rgba(30, 30, 50, 0.5)';
+                });
+                
+                area.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                    this.style.background = 'rgba(30, 30, 50, 0.5)';
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        const input = this.querySelector('input[type="file"]');
+                        input.files = files;
+                        
+                        // 显示文件名
+                        const uploadText = this.querySelector('.upload-text');
+                        if (files.length === 1) {
+                            uploadText.textContent = `已选择: ${files[0].name}`;
+                        } else {
+                            uploadText.textContent = `已选择: ${files.length} 个文件`;
+                        }
+                    }
+                });
+            });
+        });
+        
+        // 标签页切换功能
+        function showDataManagement() {
+            // 切换标签页样式
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 显示数据管理内容
+            document.getElementById('dataManagementContent').style.display = 'block';
+            document.getElementById('tagManagementContent').style.display = 'none';
+        }
+        
+        function showTagManagement() {
+            // 切换标签页样式
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 显示标签管理内容
+            document.getElementById('dataManagementContent').style.display = 'none';
+            document.getElementById('tagManagementContent').style.display = 'block';
+        }
+        
+        // 显示添加地理位置表单
+        function showAddLocationForm() {
+            document.getElementById('addLocationForm').classList.add('show');
+            document.getElementById('locationInput').focus();
+        }
+        
+        // 隐藏添加地理位置表单
+        function hideAddLocationForm() {
+            document.getElementById('addLocationForm').classList.remove('show');
+            document.getElementById('locationInput').value = '';
+        }
+        
+        // 添加地理位置标签
+        function addLocationTag() {
+            const input = document.getElementById('locationInput');
+            const tagName = input.value.trim();
+            
+            if (!tagName) {
+                alert('请输入地理位置名称');
+                return;
+            }
+            
+            // 检查是否已存在
+            const existingTags = document.querySelectorAll('.location-tag');
+            for (let tag of existingTags) {
+                if (tag.textContent.trim().replace('×', '').trim() === tagName) {
+                    alert('该地理位置标签已存在');
+                    return;
+                }
+            }
+            
+            // 创建新标签
+            const newTag = document.createElement('div');
+            newTag.className = 'location-tag';
+            newTag.innerHTML = `
+                ${tagName}
+                <button class="delete-btn" onclick="deleteLocationTag(this)">×</button>
+            `;
+            
+            document.getElementById('locationTags').appendChild(newTag);
+            input.value = '';
+            hideAddLocationForm();
+            
+            // 保存到后端
+            fetch('/api/location-tags/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({name: tagName})
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    console.log('地理位置标签添加成功:', result.data);
+                    // 设置新标签的ID
+                    newTag.setAttribute('data-tag-id', result.data.id);
+                } else {
+                    alert(result.message);
+                    newTag.remove(); // 如果失败，移除刚添加的标签
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('添加失败，请重试');
+                newTag.remove();
+            });
+        }
+        
+        // 删除地理位置标签
+        function deleteLocationTag(button) {
+            const tagName = button.parentElement.textContent.trim().replace('×', '').trim();
+            if (confirm(`确定要删除地理位置标签 "${tagName}" 吗？`)) {
+                const tagElement = button.parentElement;
+                
+                // 发送删除请求到后端
+                fetch(`/api/location-tags/${tagElement.dataset.tagId || 'unknown'}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        tagElement.remove();
+                        console.log('地理位置标签删除成功');
+                    } else {
+                        alert(result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('删除失败，请重试');
+                });
+            }
+        }
+        
+        // 显示添加项目归属表单
+        function showAddProjectForm() {
+            document.getElementById('addProjectForm').classList.add('show');
+            document.getElementById('projectInput').focus();
+        }
+        
+        // 隐藏添加项目归属表单
+        function hideAddProjectForm() {
+            document.getElementById('addProjectForm').classList.remove('show');
+            document.getElementById('projectInput').value = '';
+        }
+        
+        // 添加项目归属标签
+        function addProjectTag() {
+            const input = document.getElementById('projectInput');
+            const tagName = input.value.trim();
+            
+            if (!tagName) {
+                alert('请输入项目归属名称');
+                return;
+            }
+            
+            // 检查是否已存在
+            const existingTags = document.querySelectorAll('.project-tag');
+            for (let tag of existingTags) {
+                if (tag.textContent.trim().replace('×', '').trim() === tagName) {
+                    alert('该项目归属标签已存在');
+                    return;
+                }
+            }
+            
+            // 创建新标签
+            const newTag = document.createElement('div');
+            newTag.className = 'project-tag';
+            newTag.innerHTML = `
+                ${tagName}
+                <button class="delete-btn" onclick="deleteProjectTag(this)">×</button>
+            `;
+            
+            document.getElementById('projectTags').appendChild(newTag);
+            input.value = '';
+            hideAddProjectForm();
+            
+            // 保存到后端
+            fetch('/api/project-tags/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({name: tagName})
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    console.log('项目归属标签添加成功:', result.data);
+                    // 设置新标签的ID
+                    newTag.setAttribute('data-tag-id', result.data.id);
+                } else {
+                    alert(result.message);
+                    newTag.remove(); // 如果失败，移除刚添加的标签
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('添加失败，请重试');
+                newTag.remove();
+            });
+        }
+        
+        // 删除项目归属标签
+        function deleteProjectTag(button) {
+            const tagName = button.parentElement.textContent.trim().replace('×', '').trim();
+            if (confirm(`确定要删除项目归属标签 "${tagName}" 吗？`)) {
+                const tagElement = button.parentElement;
+                
+                // 发送删除请求到后端
+                fetch(`/api/project-tags/${tagElement.dataset.tagId || 'unknown'}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        tagElement.remove();
+                        console.log('项目归属标签删除成功');
+                    } else {
+                        alert(result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('删除失败，请重试');
+                });
+            }
+        }
+        
+        // 获取CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // 回车键添加标签
+        document.addEventListener('DOMContentLoaded', function() {
+            const locationInput = document.getElementById('locationInput');
+            const projectInput = document.getElementById('projectInput');
+            
+            if (locationInput) {
+                locationInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        addLocationTag();
+                    }
+                });
+            }
+            
+            if (projectInput) {
+                projectInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        addProjectTag();
+                    }
+                });
+            }
+        });
+        
+        // 模型项点击事件已通过onclick属性处理
+        
+        // 批量选择和操作功能
+        let selectedModels = new Set();
+        let currentBatchMode = null; // 'download' 或 'delete'
+        
+        // 启用批量下载模式
+        function enableBatchDownload() {
+            currentBatchMode = 'download';
+            showBatchMode();
+        }
+        
+        // 启用批量删除模式
+        function enableBatchDelete() {
+            currentBatchMode = 'delete';
+            showBatchMode();
+        }
+        
+        // 显示批量操作模式
+        function showBatchMode() {
+            // 隐藏批量操作按钮
+            document.getElementById('batchActions').style.display = 'none';
+            
+            // 显示批量确认栏
+            document.getElementById('batchConfirm').style.display = 'flex';
+            
+            // 显示所有选择框
+            document.querySelectorAll('.model-selector').forEach(selector => {
+                selector.style.display = 'block';
+            });
+            
+            // 禁用点击查看详情功能
+            document.querySelectorAll('.model-thumbnail, .model-info').forEach(element => {
+                element.style.pointerEvents = 'none';
+            });
+            
+            // 更新确认按钮文本
+            const confirmBtn = document.querySelector('#batchConfirm .btn-primary');
+            if (currentBatchMode === 'download') {
+                confirmBtn.innerHTML = '<i class="fas fa-check"></i> 确认导出';
+            } else if (currentBatchMode === 'delete') {
+                confirmBtn.innerHTML = '<i class="fas fa-trash"></i> 确认删除';
+            }
+        }
+        
+        // 切换选择状态
+        function toggleSelection(modelId) {
+            const checkbox = document.querySelector(`input[data-model-id="${modelId}"]`);
+            const modelItem = document.querySelector(`.model-item[data-model-id="${modelId}"]`);
+            
+            if (checkbox.checked) {
+                selectedModels.add(modelId);
+                modelItem.classList.add('selected');
+            } else {
+                selectedModels.delete(modelId);
+                modelItem.classList.remove('selected');
+            }
+            
+            updateSelectedCount();
+        }
+        
+        // 更新选择数量
+        function updateSelectedCount() {
+            const selectedCount = document.getElementById('selectedCount');
+            selectedCount.textContent = selectedModels.size;
+        }
+        
+        // 确认批量操作
+        function confirmBatchAction() {
+            if (selectedModels.size === 0) {
+                alert('请先选择要操作的数据');
+                return;
+            }
+            
+            if (currentBatchMode === 'download') {
+                confirmBatchDownload();
+            } else if (currentBatchMode === 'delete') {
+                confirmBatchDelete();
+            }
+        }
+        
+        // 确认批量下载
+        function confirmBatchDownload() {
+            if (confirm(`确定要下载选中的 ${selectedModels.size} 个数据吗？`)) {
+                selectedModels.forEach(modelId => {
+                    // 创建下载链接
+                    const link = document.createElement('a');
+                    link.href = `/api/data-models/${modelId}/download/`;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
+                
+                alert('批量下载已开始');
+                cancelBatchAction();
+            }
+        }
+        
+        // 确认批量删除
+        function confirmBatchDelete() {
+            if (confirm(`确定要删除选中的 ${selectedModels.size} 个数据吗？此操作不可恢复！`)) {
+                const deletePromises = Array.from(selectedModels).map(modelId => {
+                    return fetch(`/api/data-models/${modelId}/delete/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        }
+                    });
+                });
+                
+                Promise.all(deletePromises)
+                    .then(responses => Promise.all(responses.map(r => r.json())))
+                    .then(results => {
+                        const successCount = results.filter(r => r.success).length;
+                        alert(`批量删除完成，成功删除 ${successCount} 个数据`);
+                        location.reload();
+                    })
+                    .catch(error => {
+                        console.error('批量删除失败:', error);
+                        alert('批量删除失败，请重试');
+                    });
+            }
+        }
+        
+        // 取消批量操作
+        function cancelBatchAction() {
+            // 清除选择
+            selectedModels.clear();
+            document.querySelectorAll('.model-checkbox').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            document.querySelectorAll('.model-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // 隐藏选择框
+            document.querySelectorAll('.model-selector').forEach(selector => {
+                selector.style.display = 'none';
+            });
+            
+            // 恢复点击查看详情功能
+            document.querySelectorAll('.model-thumbnail, .model-info').forEach(element => {
+                element.style.pointerEvents = 'auto';
+            });
+            
+            // 显示批量操作按钮
+            document.getElementById('batchActions').style.display = 'flex';
+            
+            // 隐藏批量确认栏
+            document.getElementById('batchConfirm').style.display = 'none';
+            
+            // 重置模式
+            currentBatchMode = null;
+        }
+        
+        // 编辑模型
+        function editModel() {
+            if (!currentModelId) {
+                alert('请先选择一个数据');
+                return;
+            }
+            
+            // 获取当前模型数据并填充编辑表单
+            fetch(`/api/data-models/${currentModelId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        populateEditForm(data.model);
+                        openEditModal();
+                    } else {
+                        alert('获取模型数据失败: ' + (data.message || '未知错误'));
+                    }
+                })
+                .catch(error => {
+                    console.error('获取模型数据失败:', error);
+                    alert('获取模型数据失败，请重试');
+                });
+        }
+        
+        // 填充编辑表单
+        function populateEditForm(model) {
+            document.getElementById('editModelName').value = model.name || '';
+            document.getElementById('editProjectTag').value = model.project_tag ? model.project_tag.id : '';
+            document.getElementById('editLocationTag').value = model.location_tag ? model.location_tag.id : '';
+            document.getElementById('editDescription').value = model.description || '';
+            
+            // 设置单选按钮
+            if (model.source === 'internal') {
+                document.getElementById('editSourceInternal').checked = true;
+            } else {
+                document.getElementById('editSourceExternal').checked = true;
+            }
+            
+            if (model.infringement_risk === 'no') {
+                document.getElementById('editInfringementNo').checked = true;
+            } else {
+                document.getElementById('editInfringementYes').checked = true;
+            }
+            
+            if (model.model_level === 'confidential') {
+                document.getElementById('editLevelConfidential').checked = true;
+            } else if (model.model_level === 'important') {
+                document.getElementById('editLevelImportant').checked = true;
+            } else {
+                document.getElementById('editLevelNormal').checked = true;
+            }
+            
+            // 更新字符计数
+            updateCharCounter('editDescription');
+        }
+        
+        // 打开编辑模态框
+        function openEditModal() {
+            document.getElementById('editModal').classList.add('show');
+        }
+        
+        // 关闭编辑模态框
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('show');
+        }
+        
+        // 保存编辑
+        function saveEdit() {
+            if (!currentModelId) {
+                alert('请先选择一个数据');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('name', document.getElementById('editModelName').value);
+            formData.append('project_tag', document.getElementById('editProjectTag').value);
+            formData.append('location_tag', document.getElementById('editLocationTag').value);
+            formData.append('description', document.getElementById('editDescription').value);
+            
+            // 获取单选按钮值
+            const source = document.querySelector('input[name="source"]:checked');
+            if (source) formData.append('source', source.value);
+            
+            const infringement = document.querySelector('input[name="infringement_risk"]:checked');
+            if (infringement) formData.append('infringement_risk', infringement.value);
+            
+            const level = document.querySelector('input[name="model_level"]:checked');
+            if (level) formData.append('model_level', level.value);
+            
+            fetch(`/api/data-models/${currentModelId}/update/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('编辑成功');
+                    closeEditModal();
+                    location.reload();
+                } else {
+                    alert('编辑失败: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('编辑失败:', error);
+                alert('编辑失败，请重试');
+            });
+        }
+        
+        // 更新字符计数
+        function updateCharCounter(textareaId) {
+            const textarea = document.getElementById(textareaId);
+            const counter = textarea.nextElementSibling;
+            if (counter && counter.classList.contains('char-counter')) {
+                counter.textContent = `${textarea.value.length}/255`;
+            }
+        }
+        
+        // 为编辑表单添加字符计数
+        document.addEventListener('DOMContentLoaded', function() {
+            const editDescription = document.getElementById('editDescription');
+            if (editDescription) {
+                editDescription.addEventListener('input', function() {
+                    updateCharCounter('editDescription');
+                });
+            }
+        });
+        
+        // 删除模型
+        function deleteModel() {
+            if (!currentModelId) {
+                alert('请先选择一个数据');
+                return;
+            }
+            
+            if (confirm('确定要删除这个数据吗？此操作不可恢复！')) {
+                fetch(`/api/data-models/${currentModelId}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        alert('删除成功');
+                        closePreviewModal();
+                        location.reload();
+                    } else {
+                        alert('删除失败: ' + result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('删除失败:', error);
+                    alert('删除失败，请重试');
+                });
+            }
+        }
+        
+        // 获取CSRF Token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // 查询功能
+        function performSearch() {
+            const source = document.querySelector('input[name="source"]:checked').value;
+            const projectTag = document.getElementById('projectTagSelect').value;
+            const modelName = document.getElementById('modelNameInput').value.trim();
+            const startDate = document.getElementById('startDateInput').value;
+            const endDate = document.getElementById('endDateInput').value;
+            
+            console.log('查询条件:', {
+                source: source,
+                projectTag: projectTag,
+                modelName: modelName,
+                startDate: startDate,
+                endDate: endDate
+            });
+            
+            // 构建查询参数
+            const params = new URLSearchParams();
+            if (source) params.append('source', source);
+            if (projectTag) params.append('project_tag', projectTag);
+            if (modelName) params.append('model_name', modelName);
+            if (startDate) params.append('start_date', startDate);
+            if (endDate) params.append('end_date', endDate);
+            
+            // 发送查询请求
+            fetch(`/data-management/?${params.toString()}`)
+                .then(response => response.text())
+                .then(html => {
+                    // 解析返回的HTML并更新页面
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newGrid = doc.getElementById('modelsGrid');
+                    const newPagination = doc.querySelector('.pagination');
+                    
+                    if (newGrid) {
+                        document.getElementById('modelsGrid').innerHTML = newGrid.innerHTML;
+                    }
+                    
+                    if (newPagination) {
+                        const currentPagination = document.querySelector('.pagination');
+                        if (currentPagination) {
+                            currentPagination.innerHTML = newPagination.innerHTML;
+                        }
+                    }
+                    
+                    // 重新初始化搜索功能
+                    initializeSearchData();
+                    
+                    console.log('查询完成');
+                })
+                .catch(error => {
+                    console.error('查询失败:', error);
+                    alert('查询失败，请重试');
+                });
+        }
+        
+        // 重置筛选条件
+        function resetFilters() {
+            document.getElementById('sourceInternal').checked = true;
+            document.getElementById('projectTagSelect').value = '';
+            document.getElementById('modelNameInput').value = '';
+            document.getElementById('startDateInput').value = '';
+            document.getElementById('endDateInput').value = '';
+            
+            // 重新加载页面以显示所有数据
+            window.location.href = '/data-management/';
+        }
+        
+        // 搜索数据存储
+        let allModels = [];
+        
+        // 初始化搜索数据
+        function initializeSearchData() {
+            allModels = [];
+            const modelItems = document.querySelectorAll('.model-item');
+            
+            modelItems.forEach(item => {
+                const modelId = item.getAttribute('data-model-id');
+                const titleElement = item.querySelector('.model-title');
+                const sourceElement = item.querySelector('.model-source');
+                const metaElement = item.querySelector('.model-meta');
+                
+                if (titleElement && sourceElement) {
+                    allModels.push({
+                        id: modelId,
+                        name: titleElement.textContent.trim(),
+                        source: sourceElement.textContent.trim(),
+                        element: item
+                    });
+                }
+            });
+        }
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSearchData();
+            setupFileUpload();
+            
+            // 为描述文本框添加字符计数
+            const descriptionTextarea = document.getElementById('editDescription');
+            if (descriptionTextarea) {
+                descriptionTextarea.addEventListener('input', updateCharCounter);
+            }
+        });
+        
+        // 分页功能
+        document.querySelectorAll('.page-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (this.textContent === '<' || this.textContent === '>') {
+                    // 处理上一页/下一页
+                    console.log('切换页面:', this.textContent);
+                } else {
+                    // 处理页码点击
+                    const container = this.closest('.pagination-controls');
+                    container.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+        
+        // 文件拖拽上传
+        const fileUpload = document.querySelector('.file-upload-area');
+        
+        if (fileUpload) {
+            fileUpload.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.style.borderColor = '#4a9eff';
+            });
+            
+            fileUpload.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+            });
+            
+            fileUpload.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    document.getElementById('mediaFileInput').files = files;
+                    this.querySelector('.upload-text').textContent = `已选择: ${files[0].name}`;
+                }
+            });
+        }
+        
+        // 文件选择变化
+        const mediaFileInput = document.getElementById('mediaFileInput');
+        if (mediaFileInput) {
+            mediaFileInput.addEventListener('change', function() {
+                if (this.files.length > 0) {
+                    const fileUploadArea = document.querySelector('.file-upload-area');
+                    if (fileUploadArea) {
+                        fileUploadArea.querySelector('.upload-text').textContent = `已选择: ${this.files[0].name}`;
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

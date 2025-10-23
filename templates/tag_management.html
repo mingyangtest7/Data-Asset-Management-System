@@ -1,0 +1,808 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据资产管理系统</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0f1419;
+            color: #ffffff;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* 顶部导航栏 */
+        .top-navbar {
+            background: rgba(15, 20, 25, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0 2rem;
+            height: 60px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .navbar-brand {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        
+        .navbar-brand:hover {
+            color: #4a9eff;
+        }
+        
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .navbar-link {
+            color: #a0a0a0;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+        
+        .navbar-link:hover {
+            color: #ffffff;
+        }
+        
+        .notification-icon {
+            color: #a0a0a0;
+            font-size: 18px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .notification-icon:hover {
+            color: #4a9eff;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #ffffff;
+            font-size: 14px;
+        }
+        
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #4a9eff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .user-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(30, 30, 50, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 0.5rem 0;
+            min-width: 150px;
+            display: none;
+        }
+        
+        .dropdown-item {
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s ease;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+        
+        /* 左侧边栏 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 60px;
+            width: 250px;
+            height: calc(100vh - 60px);
+            background: rgba(20, 25, 35, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem 0;
+            z-index: 999;
+        }
+        
+        .sidebar-item {
+            display: block;
+            color: #a0a0a0;
+            text-decoration: none;
+            padding: 1rem 2rem;
+            margin: 0.25rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .sidebar-item:hover,
+        .sidebar-item.active {
+            background: rgba(74, 158, 255, 0.2);
+            color: #4a9eff;
+        }
+        
+        .sidebar-item i {
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* 主内容区 */
+        .main-content {
+            margin-left: 250px;
+            margin-top: 60px;
+            padding: 2rem;
+            min-height: calc(100vh - 60px);
+        }
+        
+        /* 标签页导航 */
+        .nav-tabs {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        .nav-tabs .nav-link {
+            color: #a0a0a0;
+            border: none;
+            background: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tabs .nav-link:hover,
+        .nav-tabs .nav-link.active {
+            color: #4a9eff;
+            background: none;
+            border-bottom: 2px solid #4a9eff;
+        }
+        
+        /* 标签管理容器 */
+        .tag-management-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .tag-section {
+            background: rgba(30, 30, 50, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 1.5rem;
+            backdrop-filter: blur(5px);
+        }
+        
+        .tag-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .tag-section-title {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .new-tag-btn {
+            background: #4a9eff;
+            border: none;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .new-tag-btn:hover {
+            background: #357abd;
+        }
+        
+        /* 地理位置标签样式 */
+        .location-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        
+        .location-tag {
+            background: #dc3545;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .location-tag:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+        
+        .location-tag .delete-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        
+        .location-tag .delete-btn:hover {
+            opacity: 1;
+        }
+        
+        /* 项目归属标签样式 */
+        .project-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        
+        .project-tag {
+            background: #28a745;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .project-tag:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+        
+        .project-tag .delete-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+        
+        .project-tag .delete-btn:hover {
+            opacity: 1;
+        }
+        
+        /* 添加标签表单 */
+        .add-tag-form {
+            background: rgba(40, 40, 60, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+        
+        .add-tag-form.show {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .form-control {
+            background: rgba(30, 30, 50, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 14px;
+            width: 100%;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #4a9eff;
+            box-shadow: 0 0 0 3px rgba(74, 158, 255, 0.2);
+        }
+        
+        .form-control::placeholder {
+            color: #a0a0a0;
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: #ffffff;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .btn-primary {
+            background: #4a9eff;
+            color: #ffffff;
+        }
+        
+        .btn-primary:hover {
+            background: #357abd;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .tag-management-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <nav class="top-navbar">
+        <a href="{% url 'accounts:dashboard' %}" class="navbar-brand">
+            <i class="fas fa-cube me-2"></i>
+            ADASPACE 国星宇航 三维数据资产管理平台
+        </a>
+        
+        <div class="navbar-right">
+            <a href="#" class="navbar-link">平台使用文档</a>
+            <i class="fas fa-bell notification-icon"></i>
+            <div class="user-dropdown">
+                <div class="user-info" onclick="toggleDropdown()">
+                    <div class="user-avatar">
+                        {{ user.username|first|upper }}
+                    </div>
+                    <span>超级管理员</span>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="dropdown-menu" id="userDropdown">
+                    <a href="{% url 'accounts:person' %}" class="dropdown-item">
+                        <i class="fas fa-user me-2"></i>
+                        个人中心
+                    </a>
+                    <a href="{% url 'accounts:logout' %}" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt me-2"></i>
+                        退出登录
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 左侧边栏 -->
+    <aside class="sidebar">
+        <a href="{% url 'accounts:dashboard' %}" class="sidebar-item">
+            <i class="fas fa-chart-bar"></i>
+            数据统计
+        </a>
+        <a href="{% url 'accounts:my_data' %}" class="sidebar-item">
+            <i class="fas fa-folder"></i>
+            我的数据
+        </a>
+        <a href="{% url 'accounts:data_management' %}" class="sidebar-item">
+            <i class="fas fa-list"></i>
+            数据管理
+        </a>
+        <a href="#" class="sidebar-item active">
+            <i class="fas fa-tags"></i>
+            标签管理
+        </a>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main-content">
+        <!-- 标签页导航 -->
+        <ul class="nav nav-tabs mb-3">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'accounts:data_management' %}">数据管理</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="#">标签管理</a>
+            </li>
+        </ul>
+
+        <!-- 标签管理容器 -->
+        <div class="tag-management-container">
+            <!-- 地理位置标签 -->
+            <div class="tag-section">
+                <div class="tag-section-header">
+                    <h3 class="tag-section-title">地理位置</h3>
+                    <button class="new-tag-btn" onclick="showAddLocationForm()">
+                        <i class="fas fa-plus"></i>
+                        新建
+                    </button>
+                </div>
+                
+                <!-- 添加地理位置表单 -->
+                <div class="add-tag-form" id="addLocationForm">
+                    <div class="form-group">
+                        <label class="form-label">地理位置名称</label>
+                        <input type="text" class="form-control" id="locationInput" placeholder="请输入地理位置名称">
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-secondary" onclick="hideAddLocationForm()">取消</button>
+                        <button class="btn btn-primary" onclick="addLocationTag()">添加</button>
+                    </div>
+                </div>
+                
+                <!-- 地理位置标签列表 -->
+                <div class="location-tags" id="locationTags">
+                    <div class="location-tag">
+                        四川
+                        <button class="delete-btn" onclick="deleteLocationTag(this)">×</button>
+                    </div>
+                    <div class="location-tag">
+                        555
+                        <button class="delete-btn" onclick="deleteLocationTag(this)">×</button>
+                    </div>
+                    <div class="location-tag">
+                        新加坡
+                        <button class="delete-btn" onclick="deleteLocationTag(this)">×</button>
+                    </div>
+                    <div class="location-tag">
+                        太空素材
+                        <button class="delete-btn" onclick="deleteLocationTag(this)">×</button>
+                    </div>
+                    <div class="location-tag">
+                        新疆喀什
+                        <button class="delete-btn" onclick="deleteLocationTag(this)">×</button>
+                    </div>
+                    <div class="location-tag">
+                        松山湖
+                        <button class="delete-btn" onclick="deleteLocationTag(this)">×</button>
+                    </div>
+                    <div class="location-tag">
+                        泰安
+                        <button class="delete-btn" onclick="deleteLocationTag(this)">×</button>
+                    </div>
+                    <div class="location-tag">
+                        台北
+                        <button class="delete-btn" onclick="deleteLocationTag(this)">×</button>
+                    </div>
+                    <div class="location-tag">
+                        青岛
+                        <button class="delete-btn" onclick="deleteLocationTag(this)">×</button>
+                    </div>
+                    <div class="location-tag">
+                        重庆
+                        <button class="delete-btn" onclick="deleteLocationTag(this)">×</button>
+                    </div>
+                    <div class="location-tag">
+                        克孜勒苏柯尔克孜自治州
+                        <button class="delete-btn" onclick="deleteLocationTag(this)">×</button>
+                    </div>
+                    <div class="location-tag">
+                        上海
+                        <button class="delete-btn" onclick="deleteLocationTag(this)">×</button>
+                    </div>
+                    <div class="location-tag">
+                        北京
+                        <button class="delete-btn" onclick="deleteLocationTag(this)">×</button>
+                    </div>
+                    <div class="location-tag">
+                        成都
+                        <button class="delete-btn" onclick="deleteLocationTag(this)">×</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 项目归属标签 -->
+            <div class="tag-section">
+                <div class="tag-section-header">
+                    <h3 class="tag-section-title">项目归属</h3>
+                    <button class="new-tag-btn" onclick="showAddProjectForm()">
+                        <i class="fas fa-plus"></i>
+                        新建
+                    </button>
+                </div>
+                
+                <!-- 添加项目归属表单 -->
+                <div class="add-tag-form" id="addProjectForm">
+                    <div class="form-group">
+                        <label class="form-label">项目归属名称</label>
+                        <input type="text" class="form-control" id="projectInput" placeholder="测试输入项目归属标签">
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn btn-secondary" onclick="hideAddProjectForm()">取消</button>
+                        <button class="btn btn-primary" onclick="addProjectTag()">添加</button>
+                    </div>
+                </div>
+                
+                <!-- 项目归属标签列表 -->
+                <div class="project-tags" id="projectTags">
+                    <div class="project-tag">
+                        高德
+                        <button class="delete-btn" onclick="deleteProjectTag(this)">×</button>
+                    </div>
+                    <div class="project-tag">
+                        星游-成都
+                        <button class="delete-btn" onclick="deleteProjectTag(this)">×</button>
+                    </div>
+                    <div class="project-tag">
+                        展厅大屏演示内容-月球
+                        <button class="delete-btn" onclick="deleteProjectTag(this)">×</button>
+                    </div>
+                    <div class="project-tag">
+                        星游-青岛
+                        <button class="delete-btn" onclick="deleteProjectTag(this)">×</button>
+                    </div>
+                    <div class="project-tag">
+                        台北元宇宙
+                        <button class="delete-btn" onclick="deleteProjectTag(this)">×</button>
+                    </div>
+                    <div class="project-tag">
+                        泰安雨污管线提升及智慧化建设工程-多维感知大脑-元宇宙交互平台
+                        <button class="delete-btn" onclick="deleteProjectTag(this)">×</button>
+                    </div>
+                    <div class="project-tag">
+                        松山湖城市元宇宙
+                        <button class="delete-btn" onclick="deleteProjectTag(this)">×</button>
+                    </div>
+                    <div class="project-tag">
+                        成都未来科技城一体化管理平台项目
+                        <button class="delete-btn" onclick="deleteProjectTag(this)">×</button>
+                    </div>
+                    <div class="project-tag">
+                        新疆数字博览中心卫星互联网信息化提升项目设备及系统集成服务-喀什元宇宙
+                        <button class="delete-btn" onclick="deleteProjectTag(this)">×</button>
+                    </div>
+                    <div class="project-tag">
+                        Vision Pro
+                        <button class="delete-btn" onclick="deleteProjectTag(this)">×</button>
+                    </div>
+                    <div class="project-tag">
+                        灵境引擎
+                        <button class="delete-btn" onclick="deleteProjectTag(this)">×</button>
+                    </div>
+                    <div class="project-tag">
+                        星游1
+                        <button class="delete-btn" onclick="deleteProjectTag(this)">×</button>
+                    </div>
+                    <div class="project-tag">
+                        AS05
+                        <button class="delete-btn" onclick="deleteProjectTag(this)">×</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 用户下拉菜单
+        function toggleDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+        
+        // 点击外部关闭下拉菜单
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('userDropdown');
+            const userInfo = document.querySelector('.user-info');
+            if (!userInfo.contains(event.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+        
+        // 显示添加地理位置表单
+        function showAddLocationForm() {
+            document.getElementById('addLocationForm').classList.add('show');
+            document.getElementById('locationInput').focus();
+        }
+        
+        // 隐藏添加地理位置表单
+        function hideAddLocationForm() {
+            document.getElementById('addLocationForm').classList.remove('show');
+            document.getElementById('locationInput').value = '';
+        }
+        
+        // 添加地理位置标签
+        function addLocationTag() {
+            const input = document.getElementById('locationInput');
+            const tagName = input.value.trim();
+            
+            if (!tagName) {
+                alert('请输入地理位置名称');
+                return;
+            }
+            
+            // 检查是否已存在
+            const existingTags = document.querySelectorAll('.location-tag');
+            for (let tag of existingTags) {
+                if (tag.textContent.trim().replace('×', '').trim() === tagName) {
+                    alert('该地理位置标签已存在');
+                    return;
+                }
+            }
+            
+            // 创建新标签
+            const newTag = document.createElement('div');
+            newTag.className = 'location-tag';
+            newTag.innerHTML = `
+                ${tagName}
+                <button class="delete-btn" onclick="deleteLocationTag(this)">×</button>
+            `;
+            
+            document.getElementById('locationTags').appendChild(newTag);
+            input.value = '';
+            hideAddLocationForm();
+            
+            // 这里可以添加实际的后端保存逻辑
+            console.log('添加地理位置标签:', tagName);
+        }
+        
+        // 删除地理位置标签
+        function deleteLocationTag(button) {
+            const tagName = button.parentElement.textContent.trim().replace('×', '').trim();
+            if (confirm(`确定要删除地理位置标签 "${tagName}" 吗？`)) {
+                button.parentElement.remove();
+                // 这里可以添加实际的后端删除逻辑
+                console.log('删除地理位置标签:', tagName);
+            }
+        }
+        
+        // 显示添加项目归属表单
+        function showAddProjectForm() {
+            document.getElementById('addProjectForm').classList.add('show');
+            document.getElementById('projectInput').focus();
+        }
+        
+        // 隐藏添加项目归属表单
+        function hideAddProjectForm() {
+            document.getElementById('addProjectForm').classList.remove('show');
+            document.getElementById('projectInput').value = '';
+        }
+        
+        // 添加项目归属标签
+        function addProjectTag() {
+            const input = document.getElementById('projectInput');
+            const tagName = input.value.trim();
+            
+            if (!tagName) {
+                alert('请输入项目归属名称');
+                return;
+            }
+            
+            // 检查是否已存在
+            const existingTags = document.querySelectorAll('.project-tag');
+            for (let tag of existingTags) {
+                if (tag.textContent.trim().replace('×', '').trim() === tagName) {
+                    alert('该项目归属标签已存在');
+                    return;
+                }
+            }
+            
+            // 创建新标签
+            const newTag = document.createElement('div');
+            newTag.className = 'project-tag';
+            newTag.innerHTML = `
+                ${tagName}
+                <button class="delete-btn" onclick="deleteProjectTag(this)">×</button>
+            `;
+            
+            document.getElementById('projectTags').appendChild(newTag);
+            input.value = '';
+            hideAddProjectForm();
+            
+            // 这里可以添加实际的后端保存逻辑
+            console.log('添加项目归属标签:', tagName);
+        }
+        
+        // 删除项目归属标签
+        function deleteProjectTag(button) {
+            const tagName = button.parentElement.textContent.trim().replace('×', '').trim();
+            if (confirm(`确定要删除项目归属标签 "${tagName}" 吗？`)) {
+                button.parentElement.remove();
+                // 这里可以添加实际的后端删除逻辑
+                console.log('删除项目归属标签:', tagName);
+            }
+        }
+        
+        // 回车键添加标签
+        document.getElementById('locationInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addLocationTag();
+            }
+        });
+        
+        document.getElementById('projectInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addProjectTag();
+            }
+        });
+    </script>
+</body>
+</html>

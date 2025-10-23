@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}编辑视频 - {{ video.title }}{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-edit me-2"></i>
+    编辑视频信息
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-edit me-2"></i>
+                    编辑视频信息
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="title" class="form-label">
+                                    <i class="fas fa-heading me-1"></i>
+                                    标题 <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="title" name="title" 
+                                       value="{{ video.title }}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="category" class="form-label">
+                                    <i class="fas fa-folder me-1"></i>
+                                    分类
+                                </label>
+                                <select class="form-select" id="category" name="category">
+                                    <option value="">选择分类</option>
+                                    {% for category in categories %}
+                                        <option value="{{ category.id }}" 
+                                                {% if video.category.id == category.id %}selected{% endif %}>
+                                            {{ category.name }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 描述 -->
+                    <div class="mb-3">
+                        <label for="description" class="form-label">
+                            <i class="fas fa-align-left me-1"></i>
+                            描述
+                        </label>
+                        <textarea class="form-control" id="description" name="description" rows="3"
+                                  placeholder="请输入视频描述...">{{ video.description }}</textarea>
+                    </div>
+
+                    <!-- 标签 -->
+                    <div class="mb-3">
+                        <label for="tags" class="form-label">
+                            <i class="fas fa-tags me-1"></i>
+                            标签
+                        </label>
+                        <input type="text" class="form-control" id="tags" name="tags"
+                               value="{{ video.tags }}" placeholder="请输入标签，用逗号分隔">
+                        <div class="form-text">例如：宣传片,培训,2024</div>
+                    </div>
+
+                    <!-- 安全级别 -->
+                    <div class="mb-4">
+                        <label for="security_level" class="form-label">
+                            <i class="fas fa-shield-alt me-1"></i>
+                            重要级别 <span class="text-danger">*</span>
+                        </label>
+                        <div class="row">
+                            {% for level, name in security_levels.items %}
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="security_level" 
+                                           id="level{{ level }}" value="{{ level }}" 
+                                           {% if video.security_level == level %}checked{% endif %}>
+                                    <label class="form-check-label" for="level{{ level }}">
+                                        <span class="security-badge security-{{ name|lower }}">{{ name }}</span>
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            请根据视频内容的重要性选择合适的安全级别
+                        </div>
+                    </div>
+
+                    <!-- 文件信息（只读） -->
+                    <div class="mb-4">
+                        <h6>文件信息</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>文件名：</strong> {{ video.file.name|default:"未知" }}</p>
+                                <p><strong>文件大小：</strong> {{ video.file_size_mb }} MB</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>文件类型：</strong> {{ video.get_file_type_display }}</p>
+                                <p><strong>上传时间：</strong> {{ video.uploaded_at|date:"Y-m-d H:i:s" }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 提交按钮 -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{% url 'videos:video_detail' video.id %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            返回详情
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>
+                            保存更改
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 表单验证
+document.querySelector('form').addEventListener('submit', function(e) {
+    const title = document.getElementById('title').value.trim();
+    if (!title) {
+        e.preventDefault();
+        alert('请输入视频标题');
+        return false;
+    }
+});
+</script>
+{% endblock %}

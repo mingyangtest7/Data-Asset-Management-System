@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API测试</title>
+    <style>
+        body {
+            background: #0f1419;
+            color: #ffffff;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            padding: 2rem;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(30, 30, 50, 0.8);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .test-btn {
+            background: #4a9eff;
+            color: #ffffff;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 1rem 0;
+            display: block;
+            width: 100%;
+        }
+        
+        .test-btn:hover {
+            background: #357abd;
+        }
+        
+        .test-result {
+            background: rgba(40, 40, 60, 0.8);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>API端点测试</h1>
+        
+        <button class="test-btn" onclick="testAPI()">测试API端点</button>
+        <button class="test-btn" onclick="testUpload()">测试上传功能</button>
+        
+        <div id="testResult" class="test-result">
+            测试结果将显示在这里...
+        </div>
+    </div>
+
+    <script>
+        function logResult(message) {
+            const resultDiv = document.getElementById('testResult');
+            const timestamp = new Date().toLocaleTimeString();
+            resultDiv.textContent += `[${timestamp}] ${message}\n`;
+            console.log(message);
+        }
+        
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        function testAPI() {
+            logResult('开始测试API端点...');
+            
+            const apiEndpoints = [
+                '/accounts/api/data-models/',
+                '/accounts/api/permission-groups/',
+                '/accounts/api/location-tags/',
+                '/accounts/api/project-tags/',
+            ];
+            
+            apiEndpoints.forEach(url => {
+                fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                })
+                .then(response => {
+                    logResult(`URL: ${url} - 状态码: ${response.status}`);
+                    return response.text();
+                })
+                .then(data => {
+                    logResult(`URL: ${url} - 响应长度: ${data.length} 字符`);
+                })
+                .catch(error => {
+                    logResult(`URL: ${url} - 错误: ${error.message}`);
+                });
+            });
+        }
+        
+        function testUpload() {
+            logResult('开始测试上传功能...');
+            
+            // 创建测试文件
+            const testFile = new File(['test content'], 'test.png', { type: 'image/png' });
+            const formData = new FormData();
+            formData.append('name', '测试模型');
+            formData.append('source', 'internal');
+            formData.append('project_tag', '1');
+            formData.append('location_tag', '1');
+            formData.append('infringement_risk', 'no');
+            formData.append('model_level', 'normal');
+            formData.append('description', '测试描述');
+            formData.append('media_files', testFile);
+            
+            logResult('发送上传请求...');
+            
+            fetch('/accounts/api/data-models/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: formData
+            })
+            .then(response => {
+                logResult(`上传响应状态: ${response.status}`);
+                return response.text();
+            })
+            .then(data => {
+                logResult(`上传响应数据: ${data.substring(0, 200)}...`);
+            })
+            .catch(error => {
+                logResult(`上传错误: ${error.message}`);
+            });
+        }
+        
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            logResult('页面加载完成');
+            logResult('CSRF Token: ' + getCookie('csrftoken'));
+        });
+    </script>
+</body>
+</html>
+

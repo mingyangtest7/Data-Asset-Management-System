@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上传功能调试</title>
+    <style>
+        body {
+            background: #0f1419;
+            color: #ffffff;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            padding: 2rem;
+        }
+        
+        .debug-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(30, 30, 50, 0.8);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .debug-btn {
+            background: #4a9eff;
+            color: #ffffff;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 1rem 0;
+            display: block;
+            width: 100%;
+        }
+        
+        .debug-btn:hover {
+            background: #357abd;
+        }
+        
+        .debug-info {
+            background: rgba(40, 40, 60, 0.8);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: rgba(30, 30, 50, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            margin: 5% auto;
+            padding: 2rem;
+            width: 80%;
+            max-width: 600px;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        
+        .modal-title {
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .close {
+            color: #a0a0a0;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #ffffff;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(40, 40, 60, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .file-upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+        
+        .file-upload-area:hover {
+            border-color: #4a9eff;
+        }
+        
+        .upload-icon {
+            font-size: 3rem;
+            color: #a0a0a0;
+            margin-bottom: 1rem;
+        }
+        
+        .upload-text {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-right: 1rem;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: #ffffff;
+        }
+        
+        .btn-primary {
+            background: #4a9eff;
+            color: #ffffff;
+        }
+        
+        .btn-primary:hover {
+            background: #357abd;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>上传功能调试</h1>
+        
+        <button class="debug-btn" onclick="testOpenModal()">测试打开模态框</button>
+        <button class="debug-btn" onclick="testFormValidation()">测试表单验证</button>
+        <button class="debug-btn" onclick="testFileUpload()">测试文件上传</button>
+        <button class="debug-btn" onclick="testAPI()">测试API连接</button>
+        
+        <div id="debugInfo" class="debug-info">
+            调试信息将显示在这里...
+        </div>
+        
+        <div id="uploadModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">上传图片/视频</h3>
+                    <span class="close" onclick="closeUploadModal()">&times;</span>
+                </div>
+                
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label class="form-label">模型名称:</label>
+                        <input type="text" name="modelName" class="form-control" placeholder="请输入模型名称" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">项目归属:</label>
+                        <select name="projectTag" class="form-control" required>
+                            <option value="">请选择</option>
+                            <option value="1">具身智能项目</option>
+                            <option value="2">VR/AR项目</option>
+                            <option value="3">游戏开发项目</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">地理位置:</label>
+                        <select name="locationTag" class="form-control" required>
+                            <option value="">请选择</option>
+                            <option value="1">北京</option>
+                            <option value="2">上海</option>
+                            <option value="3">广州</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">来源:</label>
+                        <div>
+                            <label><input type="radio" name="upload_source" value="internal" checked> 内部</label>
+                            <label><input type="radio" name="upload_source" value="external"> 外部</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">侵权风险:</label>
+                        <div>
+                            <label><input type="radio" name="infringement_risk" value="no" checked> 不侵权</label>
+                            <label><input type="radio" name="infringement_risk" value="yes"> 侵权</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">模型等级:</label>
+                        <div>
+                            <label><input type="radio" name="model_level" value="confidential" checked> 保密</label>
+                            <label><input type="radio" name="model_level" value="important"> 重要</label>
+                            <label><input type="radio" name="model_level" value="normal"> 普通</label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">上传图片或视频:</label>
+                        <div class="file-upload-area" onclick="document.getElementById('mediaFileInput').click()">
+                            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                            <div class="upload-text">点击或将文件拖拽到此处</div>
+                            <input type="file" id="mediaFileInput" name="mediaFiles" style="display: none;" accept=".png,.jpg,.jpeg,.bmp,.tga,.mp4,.webm" multiple>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">简介或建议:</label>
+                        <textarea name="description" class="form-control" placeholder="请输入简介或建议" rows="3"></textarea>
+                    </div>
+                </form>
+                
+                <div style="margin-top: 2rem;">
+                    <button class="btn btn-secondary" onclick="closeUploadModal()">取消</button>
+                    <button class="btn btn-primary" onclick="submitUpload()">上传图片/视频</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 调试信息显示
+        function logDebug(message) {
+            const debugInfo = document.getElementById('debugInfo');
+            const timestamp = new Date().toLocaleTimeString();
+            debugInfo.innerHTML += `[${timestamp}] ${message}<br>`;
+            console.log(message);
+        }
+        
+        // 获取CSRF token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        
+        // 测试打开模态框
+        function testOpenModal() {
+            logDebug('测试打开模态框...');
+            document.getElementById('uploadModal').style.display = 'block';
+            logDebug('模态框已打开');
+        }
+        
+        // 测试表单验证
+        function testFormValidation() {
+            logDebug('测试表单验证...');
+            
+            // 填写测试数据
+            document.querySelector('input[name="modelName"]').value = '测试模型';
+            document.querySelector('select[name="projectTag"]').value = '1';
+            document.querySelector('select[name="locationTag"]').value = '1';
+            
+            logDebug('测试数据已填写');
+            
+            // 验证必填字段
+            const modelName = document.querySelector('input[name="modelName"]').value.trim();
+            const projectTag = document.querySelector('select[name="projectTag"]').value;
+            const locationTag = document.querySelector('select[name="locationTag"]').value;
+            const mediaFiles = document.getElementById('mediaFileInput').files;
+            
+            logDebug(`模型名称: ${modelName}`);
+            logDebug(`项目归属: ${projectTag}`);
+            logDebug(`地理位置: ${locationTag}`);
+            logDebug(`文件数量: ${mediaFiles.length}`);
+            
+            if (!modelName) {
+                logDebug('错误: 模型名称为空');
+                return;
+            }
+            
+            if (!projectTag) {
+                logDebug('错误: 项目归属为空');
+                return;
+            }
+            
+            if (!locationTag) {
+                logDebug('错误: 地理位置为空');
+                return;
+            }
+            
+            if (mediaFiles.length === 0) {
+                logDebug('错误: 没有选择文件');
+                return;
+            }
+            
+            logDebug('表单验证通过');
+        }
+        
+        // 测试文件上传
+        function testFileUpload() {
+            logDebug('测试文件上传...');
+            
+            // 创建测试文件
+            const testFile = new File(['test content'], 'test.png', { type: 'image/png' });
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(testFile);
+            document.getElementById('mediaFileInput').files = dataTransfer.files;
+            
+            logDebug('测试文件已创建');
+            
+            // 验证文件
+            const files = document.getElementById('mediaFileInput').files;
+            logDebug(`文件数量: ${files.length}`);
+            
+            if (files.length > 0) {
+                const file = files[0];
+                logDebug(`文件名: ${file.name}`);
+                logDebug(`文件大小: ${file.size} bytes`);
+                logDebug(`文件类型: ${file.type}`);
+            }
+        }
+        
+        // 测试API连接
+        function testAPI() {
+            logDebug('测试API连接...');
+            
+            fetch('/accounts/api/data-models/', {
+                method: 'GET',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => {
+                logDebug(`API响应状态: ${response.status}`);
+                return response.text();
+            })
+            .then(data => {
+                logDebug(`API响应数据: ${data.substring(0, 100)}...`);
+            })
+            .catch(error => {
+                logDebug(`API连接错误: ${error.message}`);
+            });
+        }
+        
+        // 打开上传模态框
+        function openUploadModal() {
+            logDebug('打开上传模态框');
+            document.getElementById('uploadModal').style.display = 'block';
+        }
+        
+        // 关闭上传模态框
+        function closeUploadModal() {
+            logDebug('关闭上传模态框');
+            document.getElementById('uploadModal').style.display = 'none';
+            document.getElementById('uploadForm').reset();
+        }
+        
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('uploadModal');
+            if (event.target === modal) {
+                closeUploadModal();
+            }
+        }
+        
+        // 提交上传
+        function submitUpload() {
+            logDebug('开始提交上传');
+            
+            // 验证必填字段
+            const modelName = document.querySelector('input[name="modelName"]').value.trim();
+            const projectTag = document.querySelector('select[name="projectTag"]').value;
+            const locationTag = document.querySelector('select[name="locationTag"]').value;
+            const mediaFiles = document.getElementById('mediaFileInput').files;
+            
+            logDebug(`验证字段: 模型名称=${modelName}, 项目归属=${projectTag}, 地理位置=${locationTag}, 文件数量=${mediaFiles.length}`);
+            
+            if (!modelName) {
+                alert('请输入模型名称');
+                return;
+            }
+            
+            if (!projectTag) {
+                alert('请选择项目归属');
+                return;
+            }
+            
+            if (!locationTag) {
+                alert('请选择地理位置');
+                return;
+            }
+            
+            if (mediaFiles.length === 0) {
+                alert('请选择要上传的图片或视频文件');
+                return;
+            }
+            
+            // 验证文件大小（5GB限制）
+            const maxSize = 5 * 1024 * 1024 * 1024; // 5GB in bytes
+            
+            // 验证媒体文件格式
+            const allowedImageExtensions = ['.png', '.jpg', '.jpeg', '.bmp', '.tga'];
+            const allowedVideoExtensions = ['.mp4', '.webm'];
+            
+            for (let file of mediaFiles) {
+                const fileName = file.name.toLowerCase();
+                const isValidImage = allowedImageExtensions.some(ext => fileName.endsWith(ext));
+                const isValidVideo = allowedVideoExtensions.some(ext => fileName.endsWith(ext));
+                
+                if (!isValidImage && !isValidVideo) {
+                    alert(`文件 ${file.name} 格式不支持，图片支持PNG、JPG、BMP、TGA格式，视频支持MP4、WEBM格式`);
+                    return;
+                }
+                
+                if (file.size > maxSize) {
+                    alert(`文件 ${file.name} 大小不能超过5GB`);
+                    return;
+                }
+            }
+            
+            // 创建FormData对象
+            const formData = new FormData();
+            formData.append('name', modelName);
+            formData.append('source', document.querySelector('input[name="upload_source"]:checked').value);
+            formData.append('project_tag', projectTag);
+            formData.append('location_tag', locationTag);
+            formData.append('infringement_risk', document.querySelector('input[name="infringement_risk"]:checked').value);
+            formData.append('model_level', document.querySelector('input[name="model_level"]:checked').value);
+            formData.append('description', document.querySelector('textarea[name="description"]').value);
+            
+            // 添加媒体文件
+            for (let file of mediaFiles) {
+                formData.append('media_files', file);
+            }
+            
+            logDebug('发送上传请求');
+            
+            // 显示上传进度
+            const submitBtn = document.querySelector('.btn-primary');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = '上传中...';
+            submitBtn.disabled = true;
+            
+            // 发送上传请求
+            fetch('/accounts/api/data-models/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: formData
+            })
+            .then(response => {
+                logDebug(`上传响应状态: ${response.status}`);
+                return response.json();
+            })
+            .then(result => {
+                logDebug(`上传结果: ${JSON.stringify(result)}`);
+                if (result.success) {
+                    alert(result.message);
+                    closeUploadModal();
+                } else {
+                    alert(result.message);
+                }
+            })
+            .catch(error => {
+                logDebug(`上传错误: ${error.message}`);
+                alert('上传失败，请重试');
+            })
+            .finally(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
+        }
+        
+        // 页面加载完成后的初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            logDebug('页面加载完成');
+            logDebug('CSRF Token: ' + getCookie('csrftoken'));
+        });
+    </script>
+</body>
+</html>
+

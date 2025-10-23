@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ video.title }} - 视频数据信息资产管理系统{% endblock %}
+
+{% block page_title %}
+    <i class="fas fa-play me-2"></i>
+    {{ video.title }}
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- 视频播放区域 -->
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-body">
+                {% if video.file_type == 'video' %}
+                    <!-- 视频播放器 -->
+                    <video controls class="w-100" style="max-height: 500px;">
+                        <source src="{{ video.get_file_url }}" type="video/mp4">
+                        您的浏览器不支持视频播放。
+                    </video>
+                {% elif video.file_type == 'image' %}
+                    <!-- 图片显示 -->
+                    <img src="{{ video.get_file_url }}" class="img-fluid" alt="{{ video.title }}">
+                {% else %}
+                    <!-- 其他文件类型 -->
+                    <div class="text-center py-5">
+                        <i class="fas fa-file fa-4x text-muted mb-3"></i>
+                        <h5>{{ video.title }}</h5>
+                        <p class="text-muted">{{ video.get_file_type_display }} 文件</p>
+                        <a href="{% url 'videos:video_download' video.id %}" class="btn btn-primary">
+                            <i class="fas fa-download me-1"></i>
+                            下载文件
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- 视频信息 -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    视频信息
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>标题：</strong> {{ video.title }}</p>
+                        <p><strong>描述：</strong> {{ video.description|default:"无描述" }}</p>
+                        <p><strong>标签：</strong> 
+                            {% if video.tags %}
+                                {% for tag in video.tags.split:',' %}
+                                    <span class="badge bg-secondary me-1">{{ tag.strip }}</span>
+                                {% endfor %}
+                            {% else %}
+                                无标签
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>文件大小：</strong> {{ video.file_size_mb }} MB</p>
+                        <p><strong>文件类型：</strong> {{ video.get_file_type_display }}</p>
+                        <p><strong>重要级别：</strong> 
+                            <span class="security-badge security-{{ video.get_security_level_display|lower }}">
+                                {{ video.get_security_level_display }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                
+                {% if video.duration %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>时长：</strong> {{ video.duration }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        {% if video.resolution %}
+                        <p><strong>分辨率：</strong> {{ video.resolution }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>上传者：</strong> {{ video.uploader.username }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>上传时间：</strong> {{ video.uploaded_at|date:"Y-m-d H:i:s" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 侧边栏 -->
+    <div class="col-lg-4">
+        <!-- 操作按钮 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-cogs me-2"></i>
+                    操作
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'videos:video_download' video.id %}" class="btn btn-success">
+                        <i class="fas fa-download me-1"></i>
+                        下载视频
+                    </a>
+                    
+                    <button type="button" class="btn btn-outline-primary" onclick="toggleFavorite()">
+                        <i class="fas fa-heart me-1" id="favoriteIcon"></i>
+                        <span id="favoriteText">
+                            {% if is_favorited %}已收藏{% else %}收藏{% endif %}
+                        </span>
+                    </button>
+                    
+                    {% if video.uploader == user or user.userprofile.has_permission|default_if_none:False %}
+                    <a href="{% url 'videos:video_edit' video.id %}" class="btn btn-outline-warning">
+                        <i class="fas fa-edit me-1"></i>
+                        编辑信息
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- 统计信息 -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    统计信息
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary">{{ video.download_count }}</h4>
+                        <small class="text-muted">下载次数</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success">{{ video.view_count }}</h4>
+                        <small class="text-muted">观看次数</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 相关视频 -->
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-video me-2"></i>
+                    相关视频
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">暂无相关视频</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 评论区域 -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-comments me-2"></i>
+                    评论 ({{ comments.count }})
+                </h5>
+            </div>
+            <div class="card-body">
+                <!-- 添加评论 -->
+                <div class="mb-4">
+                    <form id="commentForm">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <textarea class="form-control" id="commentContent" rows="3" 
+                                      placeholder="写下您的评论..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-1"></i>
+                            发表评论
+                        </button>
+                    </form>
+                </div>
+                
+                <hr>
+                
+                <!-- 评论列表 -->
+                {% for comment in comments %}
+                <div class="d-flex mb-3">
+                    <div class="flex-shrink-0">
+                        {% if comment.user.avatar %}
+                            <img src="{{ comment.user.avatar.url }}" class="rounded-circle" width="40" height="40" alt="头像">
+                        {% else %}
+                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center" 
+                                 style="width: 40px; height: 40px;">
+                                <i class="fas fa-user text-muted"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <div class="d-flex justify-content-between">
+                            <h6 class="mb-1">{{ comment.user.username }}</h6>
+                            <small class="text-muted">{{ comment.created_at|date:"m-d H:i" }}</small>
+                        </div>
+                        <p class="mb-0">{{ comment.content }}</p>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted text-center">暂无评论，快来抢沙发吧！</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 收藏功能
+function toggleFavorite() {
+    fetch(`{% url 'videos:toggle_favorite' video.id %}`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.is_favorited) {
+            document.getElementById('favoriteIcon').className = 'fas fa-heart me-1 text-danger';
+            document.getElementById('favoriteText').textContent = '已收藏';
+        } else {
+            document.getElementById('favoriteIcon').className = 'fas fa-heart me-1';
+            document.getElementById('favoriteText').textContent = '收藏';
+        }
+        
+        // 显示提示消息
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-info alert-dismissible fade show';
+        alert.innerHTML = `
+            ${data.message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.querySelector('.card-body').prepend(alert);
+        
+        // 3秒后自动隐藏
+        setTimeout(() => {
+            alert.remove();
+        }, 3000);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('操作失败，请重试');
+    });
+}
+
+// 评论功能
+document.getElementById('commentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const content = document.getElementById('commentContent').value.trim();
+    if (!content) {
+        alert('请输入评论内容');
+        return;
+    }
+    
+    fetch(`{% url 'videos:add_comment' video.id %}`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `content=${encodeURIComponent(content)}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert(data.message);
+            document.getElementById('commentContent').value = '';
+            // 刷新页面或动态添加评论
+            location.reload();
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('评论失败，请重试');
+    });
+});
+</script>
+{% endblock %}

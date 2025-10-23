@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图表测试</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background: #1a1a1a;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .chart-container {
+            width: 400px;
+            height: 200px;
+            margin: 20px 0;
+            background: #2a2a2a;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .debug-info {
+            background: #333;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>图表测试页面</h1>
+    
+    <div class="debug-info">
+        <h3>调试信息:</h3>
+        <div id="debugOutput"></div>
+    </div>
+    
+    <div class="chart-container">
+        <canvas id="uploadChart"></canvas>
+    </div>
+    
+    <div class="chart-container">
+        <canvas id="downloadChart"></canvas>
+    </div>
+    
+    <script>
+        // 模拟从后端获取的数据
+        const chartData = {
+            "dates": [
+                "09-15", "09-16", "09-17", "09-18", "09-19", "09-20", 
+                "09-21", "09-22", "09-23", "09-24", "09-25", "09-26", 
+                "09-27", "09-28", "09-29", "09-30", "10-01", "10-02", 
+                "10-03", "10-04", "10-05", "10-06", "10-07", "10-08", 
+                "10-09", "10-10", "10-11", "10-12", "10-13", "10-14"
+            ],
+            "upload_counts": [
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2
+            ],
+            "download_counts": [
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            ]
+        };
+        
+        function log(message) {
+            console.log(message);
+            const debugOutput = document.getElementById('debugOutput');
+            debugOutput.innerHTML += '<div>' + message + '</div>';
+        }
+        
+        // 初始化图表
+        function initCharts() {
+            log('开始初始化图表...');
+            
+            log('图表数据: ' + JSON.stringify(chartData));
+            
+            // 检查数据格式
+            if (!chartData || !chartData.dates || !chartData.upload_counts || !chartData.download_counts) {
+                log('错误: 图表数据格式错误');
+                return;
+            }
+            
+            // 上传数据图表
+            const uploadCtx = document.getElementById('uploadChart');
+            if (!uploadCtx) {
+                log('错误: 找不到 uploadChart 元素');
+                return;
+            }
+            
+            log('创建上传图表...');
+            try {
+                new Chart(uploadCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: chartData.dates,
+                        datasets: [{
+                            label: '上传次数',
+                            data: chartData.upload_counts,
+                            borderColor: '#ff6b35',
+                            backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#a0a0a0',
+                                    usePointStyle: true
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    color: '#a0a0a0'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            },
+                            y: {
+                                ticks: {
+                                    color: '#a0a0a0'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }
+                        }
+                    }
+                });
+                log('上传图表创建成功');
+            } catch (error) {
+                log('上传图表创建失败: ' + error.message);
+            }
+            
+            // 下载数据图表
+            const downloadCtx = document.getElementById('downloadChart');
+            if (!downloadCtx) {
+                log('错误: 找不到 downloadChart 元素');
+                return;
+            }
+            
+            log('创建下载图表...');
+            try {
+                new Chart(downloadCtx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: chartData.dates,
+                        datasets: [{
+                            label: '下载次数',
+                            data: chartData.download_counts,
+                            borderColor: '#4a9eff',
+                            backgroundColor: 'rgba(74, 158, 255, 0.1)',
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#a0a0a0',
+                                    usePointStyle: true
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    color: '#a0a0a0'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            },
+                            y: {
+                                ticks: {
+                                    color: '#a0a0a0'
+                                },
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }
+                        }
+                    }
+                });
+                log('下载图表创建成功');
+            } catch (error) {
+                log('下载图表创建失败: ' + error.message);
+            }
+            
+            log('图表初始化完成');
+        }
+        
+        // 页面加载完成后初始化图表
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOM 加载完成，开始初始化图表');
+            initCharts();
+        });
+    </script>
+</body>
+</html>
+
